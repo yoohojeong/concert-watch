@@ -248,7 +248,7 @@ MELON_LIST = MELON_BASE + "/csoon/ajax/listTicketOpen.htm?orderType=0&pageIndex=
 MELON_DETAIL = MELON_BASE + "/csoon/detail.htm?csoonId={id}"
 MELON_PRODUCT = MELON_BASE + "/performance/index.htm?prodId={id}"
 MELON_BACKFILL = 150      # 처음 돌릴 때 거슬러 올라가 볼 공지 수(약 2~3주)
-MELON_MAX_PER_RUN = 80
+MELON_MAX_PER_RUN = 200     # 처음 거슬러 보는 공지(MELON_BACKFILL)를 한 번에 다 볼 수 있게
 MELON_PAUSE = 0.3
 MELON_HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36", "Accept-Language": "ko-KR,ko;q=0.9"}
 _KST = dt.timezone(dt.timedelta(hours=9))

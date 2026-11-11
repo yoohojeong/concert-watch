@@ -59,6 +59,8 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}   # 앞선 실행이 올린 커밋까지 받은 최신 상태에서 시작
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -91,8 +93,8 @@ jobs:
           git diff --cached --quiet && exit 0
           if [ "${{ github.event_name }}" = "issues" ]; then git commit -m "예매 계획 반영 (#${{ github.event.issue.number }})"
           else git commit -m "공연 일정 갱신"; fi
-          # 그 사이 웹페이지에서 예매 계획이 저장됐을 수 있으니 합친 뒤 올린다
-          for i in 1 2 3; do git pull --rebase && git push && exit 0; sleep 5; done
+          # 그 사이 다른 실행이 올린 커밋과 합친다. 생성 파일이 겹치면 이번 실행 결과를 쓴다
+          for i in 1 2 3; do git pull --rebase -X theirs && git push && exit 0; git rebase --abort 2>/dev/null; sleep 5; done
           exit 1
 
       - name: 이슈 닫기
