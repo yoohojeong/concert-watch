@@ -7,8 +7,37 @@
     "실리카겔",
     "혁오"
   ],
-  "auto_found": {},
+  "auto_found": {
+    "melon:13227|일반 예매|2026-11-12T11:00": "2026-11-12T01:54:49+09:00"
+  },
   "events": {
+    "melon:13227": {
+      "artist": "혁오",
+      "city": "",
+      "country": "KR",
+      "end": "2027-01-17",
+      "first_seen": "2026-11-12T01:54:49+09:00",
+      "key": "melon:13227",
+      "sale_start": "2026-11-12T11:00:00+00:00",
+      "sale_times": [
+        {
+          "at": "2026-11-12T11:00:00+00:00",
+          "label": "일반 예매"
+        }
+      ],
+      "source": "melon",
+      "start": "2027-01-16",
+      "ticket_links": [
+        {
+          "name": "멜론티켓",
+          "url": "https://ticket.melon.com/performance/index.htm?prodId=214266"
+        }
+      ],
+      "time": "",
+      "title": "HYUKOH [33] TOUR - SEOUL",
+      "url": "https://ticket.melon.com/csoon/detail.htm?csoonId=13227",
+      "venue": "올림픽공원 올림픽홀"
+    },
     "tm:1AvZZ_4GkDeDQk4": {
       "artist": "혁오",
       "city": "Toronto",
@@ -83,8 +112,9 @@
   "instagram_seen": {},
   "last_api_check": "2026-11-12T01:12:57+09:00",
   "last_api_errors": [],
-  "last_checked": "2026-11-12T01:15:12+09:00",
+  "last_checked": "2026-11-12T01:54:49+09:00",
   "last_errors": [],
+  "melon_last_id": 13262,
   "page_seen": {
     "http://www.hyukoh.com/": [
       "97bc3b1d068d8ed4",
@@ -200,16 +230,17 @@
       "c728fffa415359ac",
       "4c3acf7d07278eb3",
       "36b42c5faf0fc24e",
-      "2d4aa631182b18f7",
       "7b8df37ab239c353",
       "f0008f923c416d10",
       "6400075ec0730c28",
       "f22cb07395893fba",
+      "2d4aa631182b18f7",
       "3ceb9c0b56c5d0a9",
-      "59a66757fad14fbe",
       "59cbe20e69ef2f80",
       "615280c5bc31c0dd",
+      "59a66757fad14fbe",
       "f49368c0b0fe1ffc",
+      "8b9dc16098dd1ef0",
       "bf3bf55f12268f20",
       "5ac2e86bc991976c",
       "5cb47b49e02f1377",
@@ -221,7 +252,6 @@
       "a4c9942713fc1a99",
       "da5c86f6194dd159",
       "fa6c38cda6a9b9cf",
-      "8b9dc16098dd1ef0",
       "9f9157b476e8c3d6",
       "affc341564406542",
       "e4934f406e231a86",
@@ -235,21 +265,31 @@
       "f4eac54b0264295b",
       "424cfada3b1893ff",
       "f150cefb974c5671",
-      "2e4828b7984ede18",
       "b4232df5bd501b7c",
-      "adf35f16fb9607fc",
-      "bdd8821997e5323c",
+      "2e4828b7984ede18",
       "21b560310fdcdc24",
       "f2224a91aa514a2b",
+      "bdd8821997e5323c",
       "4f893491cacef0e4",
       "9a6192c44e99e56d",
       "30aeaa8973c05d20",
+      "adf35f16fb9607fc",
       "63cd12f7c1152e45",
       "aec24c95d1258f41",
+      "96d8f00b426bd7c4",
       "584a3e06364b0480",
       "42504a0c2272eb29",
       "b3b6c53c22a7f4ce"
     ]
   },
-  "reminders": {}
+  "reminders": {
+    "melon:13227|10min|일반 예매|2026-11-12T11:00:00+00:00": {
+      "open_at": "2026-11-12T11:00:00+00:00"
+    },
+    "melon:13227|day|일반 예매|2026-11-12T11:00:00+00:00": {
+      "mail": "none",
+      "open_at": "2026-11-12T11:00:00+00:00",
+      "push": "sent"
+    }
+  }
 }
