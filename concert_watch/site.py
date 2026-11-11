@@ -296,6 +296,17 @@ SCRIPT = r"""
 (() => {
   const DATA = JSON.parse(document.getElementById('page-data').textContent);
   const WD = '일월화수목금토';
+  let currentFilter = '';
+  let removingArtists = new Set();   // 이 기기에서 뺀(아직 반영 전) 아티스트
+  // 예매처 링크 주소로 예매처 이름을 붙인다
+  const TICKET_SITES = [['melon.com', '멜론티켓'], ['interpark.com', '인터파크'], ['nol.com', '인터파크'],
+    ['yes24.com', '예스24'], ['ticketlink.co.kr', '티켓링크'], ['ticketmaster', 'Ticketmaster'], ['axs.com', 'AXS']];
+  const siteName = (url) => {
+    let host = '';
+    try { host = new URL(url).hostname; } catch (e) { return '예매처'; }
+    const hit = TICKET_SITES.find(([d]) => host.includes(d));
+    return hit ? hit[1] : host.replace(/^www\./, '');
+  };
   const KEY_STORE = 'concert-watch-key', PENDING_STORE = 'concert-watch-pending';
   const ls = {
     get: (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -378,7 +389,7 @@ SCRIPT = r"""
     document.querySelectorAll('.pick[data-key]').forEach((btn) => {
       const p = picks[btn.dataset.key];
       btn.setAttribute('aria-pressed', String(!!p));
-      btn.textContent = p ? '예매 수정' : '예매할게요';
+      btn.textContent = p ? '오픈 일시 수정' : '예매할게요';
     });
     document.querySelectorAll('.unpick[data-key]').forEach((btn) => { btn.hidden = !picks[btn.dataset.key]; });
     document.querySelectorAll('.pick-state').forEach((el) => {
@@ -404,7 +415,7 @@ SCRIPT = r"""
       li.className = 'show';
       li.innerHTML = `<div class="day" aria-hidden="true"><span class="num"></span><span class="wd"></span></div>
         <div class="body"><p class="artist"></p><h3></h3><div class="times"></div><p class="left"></p>
-        <div class="links"></div><div class="pick-row"><button type="button" class="pick" aria-pressed="true">예매 수정</button><button type="button" class="unpick">예매 안 할래요</button></div></div>`;
+        <div class="links"></div><div class="pick-row"><button type="button" class="pick" aria-pressed="true">오픈 일시 수정</button><button type="button" class="unpick">예매 안 할래요</button></div></div>`;
       const first = next[0] || all[all.length - 1];
       li.querySelector('.num').textContent = first ? first.d.getDate() : '–';
       li.querySelector('.wd').textContent = first ? `${first.d.getMonth() + 1}월` : '발표 전';
@@ -421,7 +432,7 @@ SCRIPT = r"""
         : (next[0] ? `${next[0].label}까지 ${left(next[0].d.getTime() - now)}` : '예매가 열렸어요');
       if (/^https?:\/\//.test(p.link || '')) {
         const a = document.createElement('a');
-        a.className = 'ticket'; a.href = p.link; a.target = '_blank'; a.rel = 'noopener'; a.textContent = '예매처 열기';
+        a.className = 'ticket'; a.href = p.link; a.target = '_blank'; a.rel = 'noopener'; a.textContent = siteName(p.link);
         li.querySelector('.links').append(a);
       }
       li.querySelector('.pick').addEventListener('click', () => openDialog(key));
@@ -624,11 +635,10 @@ SCRIPT = r"""
       c.append(label, cancel);
       return c;
     }));
-    const removing = new Set(list.filter((x) => x.action === 'remove').map((x) => x.name.toLowerCase()));
-    document.querySelectorAll('.chip-group').forEach((g) => { g.hidden = removing.has(g.dataset.artist.toLowerCase()); });
-    document.querySelectorAll('.month:not(.plan) .show').forEach((sh) => {
-      if (removing.has((sh.dataset.artist || '').toLowerCase())) sh.hidden = true;
-    });
+    removingArtists = new Set(list.filter((x) => x.action === 'remove').map((x) => x.name.toLowerCase()));
+    document.querySelectorAll('.chip-group').forEach((g) => { g.hidden = removingArtists.has(g.dataset.artist.toLowerCase()); });
+    // 뺀 아티스트의 공연을 숨기고, 그래서 빈 달은 달째로 숨긴다(다른 공연이 남은 달은 그대로)
+    apply(removingArtists.has(currentFilter.toLowerCase()) ? '' : currentFilter);
   };
   const pushArtistPending = (action, name) => {
     const list = readArtistPending().filter((x) => x.name.toLowerCase() !== name.toLowerCase());
@@ -697,16 +707,19 @@ SCRIPT = r"""
     });
   });
 
-  showArtistPending();
-
   // ── 아티스트 필터 ──
   const chips = document.querySelectorAll('.chip[data-filter]');
-  const apply = (name) => {
+  function apply(name) {
+    currentFilter = name;
     chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.filter === name)));
-    document.querySelectorAll('.month:not(.plan) .show').forEach((s) => { s.hidden = !!name && s.dataset.artist !== name; });
+    document.querySelectorAll('.month:not(.plan) .show').forEach((s) => {
+      const a = s.dataset.artist || '';
+      s.hidden = removingArtists.has(a.toLowerCase()) || (!!name && a !== name);
+    });
     document.querySelectorAll('.month:not(.plan)').forEach((m) => { m.hidden = !m.querySelector('.show:not([hidden])'); });
-  };
+  }
   chips.forEach((c) => c.addEventListener('click', () => apply(c.dataset.filter)));
+  showArtistPending();
 
   // ── 알림 링크(#id)로 들어오면 그 공연을 보여줌 ──
   const focusHash = () => {
