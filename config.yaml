@@ -74,7 +74,7 @@ reminders:
   auto_countries: ["KR"]     # 자동 리마인더를 받을 공연 나라. 비우면 전부
 
 site:
-  title: 콘서트 알리미
+  title: 쩡쓰야 콘서트 가자
   url: "https://yoohojeong.github.io/concert-watch/"
   # 웹페이지에서 예매 계획을 바꿀 때 쓰는 ntfy 토픽. 공개돼도 괜찮아요(비밀문구 서명이 없으면 무시).
   edit_topic: cw-edit-33ccaeb746e846eb
