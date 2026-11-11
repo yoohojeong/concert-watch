@@ -98,6 +98,10 @@ fieldset.field legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
 .actions button:disabled { opacity: .6; cursor: progress; }
 @media (max-width: 30rem) { .show { grid-template-columns: 3.25rem 1fr; gap: .75rem; }
   .day .num { font-size: 2.2rem; } }
+.add-artist { margin: 1rem 0 1.5rem; }
+.add-artist label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.add-artist .add-row { display: flex; gap: .5rem; }
+.add-artist input { flex: 1; min-width: 0; }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 </style>
 </head>
@@ -105,12 +109,21 @@ fieldset.field legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
 <main class="wrap">
   <header>
     <h1>콘서트 알리미</h1>
-    <p>Coldplay, Oasis, 혁오 외 2팀의 공연을 추적하고 있어요. 마지막 확인 11월 12일 02:15</p>
-    <p class="warn">최근 확인에서 일부 소스를 불러오지 못했어요: 멜론티켓(HTTPError)</p>
+    <p>마지막 확인 11월 12일 02:21</p>
+    
     <p class="status" id="status" role="status" aria-live="polite"></p>
   </header>
   <section class="month plan" id="plan" hidden><h2>내 예매 계획</h2><ol></ol></section>
   <nav class="filters" aria-label="아티스트별로 보기"><button type="button" class="chip" aria-pressed="true" data-filter="">전체 3</button><button type="button" class="chip" aria-pressed="false" data-filter="Coldplay">Coldplay 0</button><button type="button" class="chip" aria-pressed="false" data-filter="Oasis">Oasis 0</button><button type="button" class="chip" aria-pressed="false" data-filter="혁오">혁오 3</button><button type="button" class="chip" aria-pressed="false" data-filter="실리카겔">실리카겔 0</button><button type="button" class="chip" aria-pressed="false" data-filter="Green Day">Green Day 0</button></nav>
+  <form class="add-artist" id="add-artist" autocomplete="off">
+    <label for="artist-name">가수 추가</label>
+    <div class="add-row">
+      <input id="artist-name" type="text" maxlength="40" placeholder="예: 잔나비, Oasis" required>
+      <button type="submit" class="primary">추가</button>
+    </div>
+    <p class="help">국내 공연 DB(KOPIS), 멜론티켓·인터파크·예스24 티켓오픈 공지, Ticketmaster, 뉴스에서 공연을 찾아요. 1시간 안에 반영돼요.</p>
+    <p class="help" id="artist-pending" hidden></p>
+  </form>
   
   <section class="month"><h2>2027년 1월</h2><ol>
       <li class="show" id="e-f4ab3248bb" data-artist="혁오">
@@ -186,7 +199,7 @@ fieldset.field legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
   </div>
 </dialog>
 
-<script type="application/json" id="page-data">{"repo": "yoohojeong/concert-watch", "branch": "main", "items": {"melon:13227": {"artist": "혁오", "title": "HYUKOH [33] TOUR - SEOUL", "anchor": "e-f4ab3248bb", "country": "KR", "start": "2027-01-16", "link": "https://ticket.melon.com/performance/index.htm?prodId=214266"}, "tm:1AvZZ_4GkDeDQk4": {"artist": "혁오", "title": "HYUKOH [33] TOUR", "anchor": "e-cb8f0d8fdb", "country": "CA", "start": "2027-04-07", "link": "https://www.ticketmaster.ca/hyukoh-33-tour-toronto-ontario-04-07-2027/event/1000655EC2EDA195"}, "tm:k7vGF_pF1pwN0": {"artist": "혁오", "title": "Hyukoh", "anchor": "e-b858f4f6bb", "country": "US", "start": "2027-04-09", "link": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4"}}, "times": {"tm:k7vGF_pF1pwN0": [{"label": "선예매(LIVE NATION PRESALE)", "at": "2026-11-10T17:00:00Z", "source": "Ticketmaster", "source_url": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4"}, {"label": "선예매(Citi® Cardmember Presale)", "at": "2026-11-10T17:00:00Z", "source": "Ticketmaster", "source_url": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4"}, {"label": "선예매(Citi® Cardmember Preferred)", "at": "2026-11-12T15:00:00Z", "source": "Ticketmaster", "source_url": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4"}, {"label": "일반 예매", "at": "2026-11-12T15:00:00Z", "source": "Ticketmaster", "source_url": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4"}], "melon:13227": [{"label": "일반 예매", "at": "2026-11-12T11:00:00+00:00", "source": "멜론티켓", "source_url": "https://ticket.melon.com/csoon/detail.htm?csoonId=13227"}], "tm:1AvZZ_4GkDeDQk4": [{"label": "선예매(LIVE NATION PRESALE)", "at": "2026-11-10T15:00:00Z", "source": "Ticketmaster", "source_url": "https://www.ticketmaster.ca/hyukoh-33-tour-toronto-ontario-04-07-2027/event/1000655EC2EDA195"}, {"label": "일반 예매", "at": "2026-11-12T15:00:00Z", "source": "Ticketmaster", "source_url": "https://www.ticketmaster.ca/hyukoh-33-tour-toronto-ontario-04-07-2027/event/1000655EC2EDA195"}]}, "picks": {"melon:13227": {"artist": "혁오", "title": "HYUKOH [33] TOUR - SEOUL", "anchor": "e-f4ab3248bb", "country": "KR", "start": "2027-01-16", "link": "https://ticket.melon.com/performance/index.htm?prodId=214266", "picked_at": "2026-11-12T02:04:30+09:00", "open_at": "", "mode": "auto"}}, "edit": {"topic": "cw-edit-33ccaeb746e846eb", "server": "https://ntfy.sh", "passphrase": false, "check": ""}}</script>
+<script type="application/json" id="page-data">{"repo": "yoohojeong/concert-watch", "branch": "main", "items": {"melon:13227": {"artist": "혁오", "title": "HYUKOH [33] TOUR - SEOUL", "anchor": "e-f4ab3248bb", "country": "KR", "start": "2027-01-16", "link": "https://ticket.melon.com/performance/index.htm?prodId=214266"}, "tm:1AvZZ_4GkDeDQk4": {"artist": "혁오", "title": "HYUKOH [33] TOUR", "anchor": "e-cb8f0d8fdb", "country": "CA", "start": "2027-04-07", "link": "https://www.ticketmaster.ca/hyukoh-33-tour-toronto-ontario-04-07-2027/event/1000655EC2EDA195"}, "tm:k7vGF_pF1pwN0": {"artist": "혁오", "title": "Hyukoh", "anchor": "e-b858f4f6bb", "country": "US", "start": "2027-04-09", "link": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4"}}, "times": {"tm:k7vGF_pF1pwN0": [{"label": "선예매(LIVE NATION PRESALE)", "at": "2026-11-10T17:00:00Z", "source": "Ticketmaster", "source_url": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4"}, {"label": "선예매(Citi® Cardmember Presale)", "at": "2026-11-10T17:00:00Z", "source": "Ticketmaster", "source_url": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4"}, {"label": "선예매(Citi® Cardmember Preferred)", "at": "2026-11-12T15:00:00Z", "source": "Ticketmaster", "source_url": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4"}, {"label": "일반 예매", "at": "2026-11-12T15:00:00Z", "source": "Ticketmaster", "source_url": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4"}], "tm:1AvZZ_4GkDeDQk4": [{"label": "선예매(LIVE NATION PRESALE)", "at": "2026-11-10T15:00:00Z", "source": "Ticketmaster", "source_url": "https://www.ticketmaster.ca/hyukoh-33-tour-toronto-ontario-04-07-2027/event/1000655EC2EDA195"}, {"label": "일반 예매", "at": "2026-11-12T15:00:00Z", "source": "Ticketmaster", "source_url": "https://www.ticketmaster.ca/hyukoh-33-tour-toronto-ontario-04-07-2027/event/1000655EC2EDA195"}], "melon:13227": [{"label": "일반 예매", "at": "2026-11-12T11:00:00+00:00", "source": "멜론티켓", "source_url": "https://ticket.melon.com/csoon/detail.htm?csoonId=13227"}]}, "picks": {"melon:13227": {"artist": "혁오", "title": "HYUKOH [33] TOUR - SEOUL", "anchor": "e-f4ab3248bb", "country": "KR", "start": "2027-01-16", "link": "https://ticket.melon.com/performance/index.htm?prodId=214266", "picked_at": "2026-11-12T02:04:30+09:00", "open_at": "", "mode": "auto"}}, "edit": {"topic": "cw-edit-33ccaeb746e846eb", "server": "https://ntfy.sh", "passphrase": false, "check": ""}}</script>
 <script>
 (() => {
   const DATA = JSON.parse(document.getElementById('page-data').textContent);
@@ -389,6 +402,13 @@ fieldset.field legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
     }
     return true;
   };
+  const post = async (change) => {
+    const k = ls.get(KEY_STORE);
+    const m = JSON.stringify({ change, ts: Math.floor(Date.now() / 1000), nonce: hex(crypto.getRandomValues(new Uint8Array(12))) });
+    const body = DATA.edit.passphrase ? { m, s: await hmacHex(k, m) } : { m };
+    const r = await fetch(`${DATA.edit.server}/${DATA.edit.topic}`, { method: 'POST', body: JSON.stringify(body) });
+    if (!r.ok) throw new Error(`ntfy 응답 ${r.status}`);
+  };
   const sendChange = async (change) => {
     let k = ls.get(KEY_STORE);
     if (DATA.edit.passphrase && !(await keyOk(k))) {
@@ -399,10 +419,7 @@ fieldset.field legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
       if (!(await keyOk(k))) { f.passField.hidden = false; throw new Error('비밀문구가 맞지 않아요.'); }
       ls.set(KEY_STORE, k);
     }
-    const m = JSON.stringify({ change, ts: Math.floor(Date.now() / 1000), nonce: hex(crypto.getRandomValues(new Uint8Array(12))) });
-    const body = DATA.edit.passphrase ? { m, s: await hmacHex(k, m) } : { m };
-    const r = await fetch(`${DATA.edit.server}/${DATA.edit.topic}`, { method: 'POST', body: JSON.stringify(body) });
-    if (!r.ok) throw new Error(`ntfy 응답 ${r.status}`);
+    await post(change);
     const pend = readPending();
     pend[change.key] = { change, at: Date.now() };
     ls.set(PENDING_STORE, JSON.stringify(pend));
@@ -452,6 +469,41 @@ fieldset.field legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
   f.close.addEventListener('click', () => dlg.close());
 
   document.querySelectorAll('.pick[data-key]').forEach((btn) => btn.addEventListener('click', () => openDialog(btn.dataset.key)));
+
+  // ── 가수 추가 ──
+  const ARTIST_PENDING = 'concert-watch-artists-pending';
+  const addForm = document.getElementById('add-artist'), nameIn = document.getElementById('artist-name');
+  const pendingBox = document.getElementById('artist-pending');
+  const known = new Set(Array.from(document.querySelectorAll('.chip[data-filter]'), (c) => c.dataset.filter.toLowerCase()));
+  const showPendingArtists = () => {
+    let list = [];
+    try { list = JSON.parse(ls.get(ARTIST_PENDING) || '[]') || []; } catch (e) {}
+    list = list.filter((x) => Date.now() - x.at < 2 * 3600e3 && !known.has(x.name.toLowerCase()));
+    ls.set(ARTIST_PENDING, JSON.stringify(list));
+    pendingBox.hidden = !list.length;
+    pendingBox.textContent = list.length ? `추가 중: ${list.map((x) => x.name).join(', ')} (다음 정시 확인 때 공연을 찾아 넣어요)` : '';
+    return list;
+  };
+  addForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const name = nameIn.value.trim().replace(/\s+/g, ' ');
+    if (!name) return;
+    if (known.has(name.toLowerCase())) { say(`${name}은(는) 이미 추적 중이에요.`); return; }
+    if (!DATA.edit.topic || (DATA.edit.passphrase && !(await keyOk(ls.get(KEY_STORE))))) {
+      say('가수를 추가하려면 먼저 예매 계획 창에서 비밀문구를 한 번 넣어주세요.'); return;
+    }
+    const btn = addForm.querySelector('button');
+    btn.disabled = true;
+    try {
+      await post({ action: 'add_artist', name });
+      const list = showPendingArtists().concat([{ name, at: Date.now() }]);
+      ls.set(ARTIST_PENDING, JSON.stringify(list));
+      showPendingArtists();
+      nameIn.value = '';
+      say(`${name}을(를) 추가했어요. 1시간 안에 공연을 찾아 넣고, 예매 오픈 시각이 나온 국내 공연은 자동으로 알려드려요.`);
+    } catch (e) { say(`추가하지 못했어요. ${e.message}`); } finally { btn.disabled = false; }
+  });
+  showPendingArtists();
 
   // ── 아티스트 필터 ──
   const chips = document.querySelectorAll('.chip');
