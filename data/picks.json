@@ -1,3 +1,16 @@
 {
-  "picks": {}
+  "picks": {
+    "melon:13227": {
+      "artist": "혁오",
+      "title": "HYUKOH [33] TOUR - SEOUL",
+      "anchor": "e-f4ab3248bb",
+      "country": "KR",
+      "start": "2027-01-16",
+      "mode": "auto",
+      "open_at": "",
+      "link": "https://ticket.melon.com/performance/index.htm?prodId=214266",
+      "picked_at": "2026-11-12T02:04:30+09:00",
+      "auto": true
+    }
+  }
 }
