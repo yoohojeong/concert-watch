@@ -112,7 +112,7 @@
   "instagram_seen": {},
   "last_api_check": "2026-11-12T01:12:57+09:00",
   "last_api_errors": [],
-  "last_checked": "2026-11-12T02:11:40+09:00",
+  "last_checked": "2026-11-12T02:15:43+09:00",
   "last_errors": [
     "멜론티켓(HTTPError)"
   ],
@@ -295,5 +295,8 @@
       "push": "sent"
     }
   },
-  "remote_nonces": []
+  "remote_nonces": [
+    "0a580ee95c65840c380235de",
+    "0c63047b7499bb15c0b56a10"
+  ]
 }
