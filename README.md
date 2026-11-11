@@ -83,18 +83,12 @@ GitHub에서 새 저장소를 **공개(Public)** 로 만들고 이 폴더의 파
 **Settings → Pages** 에서 Source를 "Deploy from a branch", 브랜치는 `main`, 폴더는 `/docs`로 저장하세요.
 주소(`https://내아이디.github.io/저장소이름/`)를 `config.yaml`의 `site.url`에 넣으면 알림에 링크가 같이 가요.
 
-### 8. 예매 계획 저장 설정
-웹페이지의 "예매할게요"는 내 저장소의 `data/picks.json`에 직접 기록해요. 그래서 기기마다 처음 한 번 GitHub 토큰을 넣어야 해요.
+### 8. 예매 계획 저장
+웹페이지에서 "예매할게요" → 저장을 누르면 내용이 채워진 GitHub 이슈 작성 화면이 열려요. GitHub에 로그인한 채로 **Create** 를 누르면 1분쯤 뒤 `data/picks.json`에 저장되고 이슈는 자동으로 닫혀요. 토큰은 필요 없어요.
 
-1. GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → Generate new token
-2. Repository access는 **Only select repositories**로 이 저장소 하나만 고르세요.
-3. Permissions → Repository permissions → **Contents: Read and write** 하나만 켜세요.
-4. 만료 기간을 정하고(최대 1년) 만들어진 토큰을 복사해 두세요.
-5. 웹페이지에서 처음 "예매할게요"를 누를 때 나오는 GitHub 토큰 칸에 붙여 넣으면 돼요.
-
-토큰은 그 기기의 브라우저에만 저장되고 저장소나 웹페이지에는 남지 않아요. 휴대폰을 잃어버렸다면 GitHub에서 그 토큰을 삭제하세요. 페이지 맨 아래 "이 기기에서 GitHub 토큰 지우기"로 지울 수도 있어요.
-
-알림 링크가 웹페이지로 바로 가려면 `config.yaml`의 `site.url`에 웹페이지 주소를 꼭 넣어주세요.
+- 저장소 주인이 연 이슈만 반영해요. 다른 사람이 같은 형식으로 이슈를 열어도 무시돼요.
+- 저장이 안 되면 이슈에 ⚠️ 댓글이 달려요. Actions 탭에서 로그를 확인하세요.
+- 휴대폰에서는 GitHub 앱이나 모바일 브라우저에서 로그인돼 있어야 해요.
 
 ### 9. 점검하고 시작하기
 1. **Actions** 탭 → concert-watch → Run workflow → "예시 공연으로 알림만 점검하기"를 체크하고 실행. 켜둔 채널로 예시 알림이 오면 연결 성공이에요.

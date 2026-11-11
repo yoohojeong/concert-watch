@@ -137,7 +137,6 @@ fieldset.field legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
       </li></ol></section>
   <footer>
     <p>공연 일정은 KOPIS 공연예술통합전산망(국내)과 Ticketmaster(해외), 공식 소식은 아티스트의 공식 인스타그램과 웹사이트에서 가져와요. 예매 전에 공식 예매처에서 다시 확인하세요.</p>
-    <p><button type="button" id="forget" hidden>이 기기에서 GitHub 토큰 지우기</button></p>
   </footer>
 </main>
 
@@ -162,11 +161,7 @@ fieldset.field legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
     <input id="link" type="url" inputmode="url" placeholder="https://">
     <p class="help">알림을 누르면 이 링크로 바로 가요. 비워둬도 돼요.</p>
   </div>
-  <div class="field" id="token-field" hidden>
-    <label for="token">GitHub 토큰</label>
-    <input id="token" type="password" autocomplete="off" spellcheck="false">
-    <p class="help">이 기기에서 처음 한 번만 필요하고, 이 브라우저에만 저장돼요. 만드는 법은 README의 "예매 계획 저장 설정"을 보세요.</p>
-  </div>
+  <p class="help">저장하면 GitHub 이슈 화면이 열려요. GitHub에 로그인한 채로 Create를 누르면 저장돼요.</p>
   <p class="error" role="alert"></p>
   <div class="actions">
     <button type="button" class="primary" id="save">저장</button>
@@ -179,13 +174,8 @@ fieldset.field legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
 <script>
 (() => {
   const DATA = JSON.parse(document.getElementById('page-data').textContent);
-  const TOKEN_KEY = 'concert-watch-token';
   const WD = '일월화수목금토';
   let picks = DATA.picks || {};
-
-  // ── 토큰(이 기기 브라우저에만 저장) ──
-  const getToken = () => { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; } };
-  const setToken = (t) => { try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch (e) {} };
 
   // ── 날짜 ──
   const pad = (n) => String(n).padStart(2, '0');
@@ -203,37 +193,23 @@ fieldset.field legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
     if (!isNaN(d)) el.textContent = `일반 예매 오픈 ${fmt(d)}`;
   });
 
-  // ── GitHub 저장 ──
+  // ── GitHub 저장: 저장된 계획은 공개 API로 읽고, 변경은 GitHub 이슈로 보낸다 ──
   const b64decode = (s) => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g, '')), (c) => c.charCodeAt(0)));
-  const b64encode = (str) => { let bin = ''; new TextEncoder().encode(str).forEach((b) => { bin += String.fromCharCode(b); }); return btoa(bin); };
-  const api = (opts = {}) => {
-    const headers = { 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' };
-    const t = getToken();
-    if (t) headers.Authorization = `Bearer ${t}`;
-    if (opts.body) headers['Content-Type'] = 'application/json';
-    const url = `https://api.github.com/repos/${DATA.repo}/contents/data/picks.json` + (opts.method ? '' : `?ref=${encodeURIComponent(DATA.branch)}`);
-    return fetch(url, { cache: 'no-store', ...opts, headers });
-  };
   const readPicks = async () => {
-    const r = await api();
-    if (r.status === 404) return { picks: {}, sha: null };
-    if (r.status === 401 || r.status === 403) throw new Error('auth');
+    const url = `https://api.github.com/repos/${DATA.repo}/contents/data/picks.json?ref=${encodeURIComponent(DATA.branch)}`;
+    const r = await fetch(url, { cache: 'no-store', headers: { 'Accept': 'application/vnd.github+json' } });
+    if (r.status === 404) return { picks: {} };
     if (!r.ok) throw new Error(`GitHub 응답 ${r.status}`);
     const j = await r.json();
-    return { picks: (JSON.parse(b64decode(j.content)).picks) || {}, sha: j.sha };
+    return { picks: (JSON.parse(b64decode(j.content)).picks) || {} };
   };
-  const savePicks = async (change, message) => {
-    for (let attempt = 0; attempt < 2; attempt++) {
-      const { picks: current, sha } = await readPicks();
-      change(current);
-      const body = { message, branch: DATA.branch, content: b64encode(JSON.stringify({ picks: current }, null, 2) + '\n') };
-      if (sha) body.sha = sha;
-      const r = await api({ method: 'PUT', body: JSON.stringify(body) });
-      if (r.ok) { picks = current; render(); return; }
-      if (r.status === 401 || r.status === 403 || r.status === 404) throw new Error('auth');
-      if (r.status !== 409 && r.status !== 422) throw new Error(`GitHub 응답 ${r.status}`);
-    }
-    throw new Error('다른 기기에서 동시에 저장했어요. 다시 시도해 주세요');
+  // 이슈 본문의 표시(<!-- concert-watch-pick -->)와 JSON을 Actions가 읽는다(concert_watch/picks.py)
+  const openIssue = (title, change) => {
+    const body = '이 화면에서 **Create** 를 누르면 예매 계획이 저장돼요. 1분쯤 뒤 웹페이지를 새로 고치면 보여요.\n'
+      + '아래 내용은 고치지 마세요.\n\n<!-- concert-watch-pick -->\n```json\n' + JSON.stringify(change, null, 2) + '\n```\n';
+    const url = `https://github.com/${DATA.repo}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+    const w = window.open(url, '_blank');
+    if (w) w.opener = null; else location.href = url;
   };
 
   // ── 화면 ──
@@ -306,7 +282,6 @@ fieldset.field legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
       li.querySelector('.pick').addEventListener('click', () => openDialog(key));
       ol.append(li);
     });
-    document.getElementById('forget').hidden = !getToken();
   };
 
   // ── 예매 계획 창 ──
@@ -315,8 +290,7 @@ fieldset.field legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
     title: dlg.querySelector('h2'), sub: dlg.querySelector('.sub'), open: dlg.querySelector('#open-at'),
     modes: dlg.querySelectorAll('input[name="mode"]'), autoBox: dlg.querySelector('#auto-box'),
     manualBox: dlg.querySelector('#manual-box'), autoList: dlg.querySelector('#auto-list'), autoHelp: dlg.querySelector('#auto-help'),
-    link: dlg.querySelector('#link'), tokenField: dlg.querySelector('#token-field'),
-    token: dlg.querySelector('#token'), error: dlg.querySelector('.error'), save: dlg.querySelector('#save'),
+    link: dlg.querySelector('#link'), error: dlg.querySelector('.error'), save: dlg.querySelector('#save'),
     remove: dlg.querySelector('#remove'), close: dlg.querySelector('#close'),
   };
   let currentKey = null;
@@ -361,38 +335,22 @@ fieldset.field legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
     showMode();
 
     f.link.value = (p && p.link) || item.link || '';
-    f.tokenField.hidden = !!getToken();
-    f.token.value = '';
     f.remove.hidden = !p;
     f.save.textContent = p ? '변경 저장' : '저장';
     dlg.showModal();
     (dlg.querySelector('input[name="mode"]:checked') || f.modes[0]).focus();
   };
 
-  const busy = (on, label) => {
-    [f.save, f.remove, f.close].forEach((b) => { b.disabled = on; });
-    if (label) f.save.textContent = label;
-  };
-  const fail = (e) => {
-    if (e.message === 'auth') {
-      setToken('');
-      f.tokenField.hidden = false;
-      f.error.textContent = 'GitHub 토큰이 맞지 않거나 이 저장소에 쓰기 권한이 없어요. 토큰을 다시 넣어주세요.';
-    } else {
-      f.error.textContent = `저장하지 못했어요. ${e.message}`;
-    }
-  };
   const ready = () => {
     if (!DATA.repo) { f.error.textContent = '저장소 정보가 없어요. GitHub Actions가 만든 페이지에서 사용하세요.'; return false; }
-    if (!getToken()) {
-      const t = f.token.value.trim();
-      if (!t) { f.error.textContent = '이 기기에서 처음 저장할 때는 GitHub 토큰이 필요해요.'; f.token.focus(); return false; }
-      setToken(t);
-    }
     return true;
   };
+  const sent = (text) => {
+    dlg.close();
+    say(`GitHub 이슈 화면을 열었어요. 거기서 Create를 누르면 1분쯤 뒤 저장돼요. ${text}`);
+  };
 
-  f.save.addEventListener('click', async () => {
+  f.save.addEventListener('click', () => {
     const m = mode();
     let d = null;
     if (m === 'manual') {
@@ -404,38 +362,25 @@ fieldset.field legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
     if (link && !/^https?:\/\//.test(link)) { f.error.textContent = '예매처 링크는 http:// 또는 https://로 시작해야 해요.'; return; }
     if (!ready()) return;
     const key = currentKey, item = DATA.items[key] || {}, prev = picks[key] || {};
-    const label = f.save.textContent;
-    busy(true, '저장하는 중…');
-    try {
-      const record = {
-        artist: prev.artist || item.artist || '', title: prev.title || item.title || '',
-        anchor: prev.anchor || item.anchor || '', country: prev.country || item.country || '',
-        start: prev.start || item.start || '', mode: m, open_at: m === 'manual' ? d.toISOString() : '',
-        link, picked_at: prev.picked_at || new Date().toISOString(),
-      };
-      await savePicks((all) => { all[key] = record; },
-        `예매 계획: ${record.artist} ${m === 'manual' ? fmt(d) : '자동'}`);
-      dlg.close();
-      say(`저장했어요. ${describe(key, record)}`);
-    } catch (e) { fail(e); } finally { busy(false, label); }
+    const record = {
+      artist: prev.artist || item.artist || '', title: prev.title || item.title || '',
+      anchor: prev.anchor || item.anchor || '', country: prev.country || item.country || '',
+      start: prev.start || item.start || '', mode: m, open_at: m === 'manual' ? d.toISOString() : '',
+      link, picked_at: prev.picked_at || new Date().toISOString(),
+    };
+    openIssue(`예매 계획: ${record.artist} ${m === 'manual' ? fmt(d) : '자동'}`, { action: 'set', key, pick: record });
+    sent(describe(key, record));
   });
 
-  f.remove.addEventListener('click', async () => {
+  f.remove.addEventListener('click', () => {
     if (!ready()) return;
     const key = currentKey, name = (picks[key] && picks[key].artist) || '';
-    busy(true);
-    try {
-      await savePicks((all) => { delete all[key]; }, `예매 계획 취소: ${name}`);
-      dlg.close();
-      say('예매 계획을 취소했어요. 3시간 안에 예정된 알림은 이미 예약돼 있어서 한 번 더 올 수 있어요.');
-    } catch (e) { fail(e); } finally { busy(false); }
+    openIssue(`예매 계획 취소: ${name}`, { action: 'delete', key });
+    sent('취소해도 3시간 안에 예정된 알림은 이미 예약돼 있어서 한 번 더 올 수 있어요.');
   });
   f.close.addEventListener('click', () => dlg.close());
 
   document.querySelectorAll('.pick[data-key]').forEach((btn) => btn.addEventListener('click', () => openDialog(btn.dataset.key)));
-  document.getElementById('forget').addEventListener('click', () => {
-    setToken(''); render(); say('이 기기에서 GitHub 토큰을 지웠어요. 다음에 저장할 때 다시 넣으면 돼요.');
-  });
 
   // ── 아티스트 필터 ──
   const chips = document.querySelectorAll('.chip');

@@ -4,7 +4,9 @@ on:
   schedule:
     - cron: "17 * * * *"     # 매시간(정각 혼잡을 피해 17분). 공연 API는 config의 api_interval_hours마다
   push:
-    paths: ["data/picks.json"]   # 웹페이지에서 예매 계획을 저장하면 바로 리마인더를 예약
+    paths: ["data/picks.json"]   # picks.json을 직접 고치면 바로 리마인더를 예약
+  issues:
+    types: [opened]              # 웹페이지의 '예매할게요'가 연 이슈를 picks.json에 반영
   workflow_dispatch:
     inputs:
       test_notify:
@@ -14,6 +16,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: concert-watch
@@ -21,6 +24,11 @@ concurrency:
 
 jobs:
   watch:
+    # 이슈는 저장소 주인이 연 예매 계획 이슈만 처리(다른 사람이 연 이슈는 무시)
+    if: >-
+      github.event_name != 'issues' ||
+      (github.event.issue.user.login == github.repository_owner &&
+       contains(github.event.issue.body, '<!-- concert-watch-pick -->'))
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -61,8 +69,13 @@ jobs:
         if: ${{ github.event_name == 'push' }}
         run: python watch.py --reminders-only
 
+      - name: 예매 계획 이슈 반영
+        id: pick
+        if: ${{ github.event_name == 'issues' }}
+        run: python watch.py --apply-issue "$GITHUB_EVENT_PATH"
+
       - name: 공연 확인
-        if: ${{ github.event_name != 'push' && !inputs.test_notify }}
+        if: ${{ github.event_name != 'push' && github.event_name != 'issues' && !inputs.test_notify }}
         run: python watch.py
 
       - name: 결과 저장
@@ -70,9 +83,23 @@ jobs:
         run: |
           git config user.name "concert-watch-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/state.json docs
+          git add data/state.json data/picks.json docs 2>/dev/null || git add data/state.json docs
           git diff --cached --quiet && exit 0
-          git commit -m "공연 일정 갱신"
+          if [ "${{ github.event_name }}" = "issues" ]; then git commit -m "예매 계획 반영 (#${{ github.event.issue.number }})"
+          else git commit -m "공연 일정 갱신"; fi
           # 그 사이 웹페이지에서 예매 계획이 저장됐을 수 있으니 합친 뒤 올린다
           for i in 1 2 3; do git pull --rebase && git push && exit 0; sleep 5; done
           exit 1
+
+      - name: 이슈 닫기
+        if: ${{ always() && github.event_name == 'issues' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RESULT: ${{ steps.pick.outputs.result }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          if [ "$JOB_STATUS" = "success" ]; then
+            gh issue close "${{ github.event.issue.number }}" -R "$GITHUB_REPOSITORY" --comment "✅ ${RESULT}"
+          else
+            gh issue comment "${{ github.event.issue.number }}" -R "$GITHUB_REPOSITORY" --body "⚠️ ${RESULT:-저장하지 못했어요.} Actions 로그를 확인하세요."
+          fi

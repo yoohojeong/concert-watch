@@ -429,3 +429,43 @@ def test_new_news_gets_open_times(monkeypatch):
     watch.run(CFG, state, NOW, None, [], news=[item])
     assert state["announcements"]["web:1"]["open_times"][0]["at"].startswith("2026-11-20T11:00")
     assert "찾은 예매 오픈 일시" in notify.build_text([state["announcements"]["web:1"]], "")
+
+
+# ── 예매 계획 이슈 → data/picks.json ─────────────────────────
+from concert_watch import picks as picks_store  # noqa: E402
+
+
+def _issue_body(change):
+    return f"설명\n\n{picks_store.MARKER}\n```json\n{json.dumps(change, ensure_ascii=False)}\n```\n"
+
+
+def _event(tmp_path, body, author="me", owner="me"):
+    path = tmp_path / "event.json"
+    path.write_text(json.dumps({"issue": {"number": 1, "body": body, "user": {"login": author}},
+                                "repository": {"owner": {"login": owner}}}), encoding="utf-8")
+    return path
+
+
+def test_issue_sets_and_deletes_pick(tmp_path):
+    picks_path = tmp_path / "picks.json"
+    pick = {"artist": "혁오", "title": "HYUKOH [33] TOUR", "mode": "manual", "open_at": "2026-11-12T11:00:00.000Z",
+            "link": "javascript:alert(1)", "picked_at": "2026-11-12T00:00:00Z", "extra": "버려짐"}
+    msg = watch.apply_issue(_event(tmp_path, _issue_body({"action": "set", "key": "kopis:PF1", "pick": pick})), picks_path)
+    saved = picks_store.load(picks_path)["kopis:PF1"]
+    assert "혁오" in msg and saved["mode"] == "manual" and saved["link"] == "" and "extra" not in saved
+
+    watch.apply_issue(_event(tmp_path, _issue_body({"action": "delete", "key": "kopis:PF1"})), picks_path)
+    assert picks_store.load(picks_path) == {}
+
+
+def test_issue_from_other_user_or_bad_body_is_rejected(tmp_path):
+    picks_path = tmp_path / "picks.json"
+    good = _issue_body({"action": "set", "key": "k", "pick": {"mode": "auto"}})
+    for body, author in [(good, "stranger"), ("그냥 이슈", "me"),
+                         (_issue_body({"action": "set", "key": "k", "pick": {"mode": "manual", "open_at": "곧"}}), "me")]:
+        try:
+            watch.apply_issue(_event(tmp_path, body, author=author), picks_path)
+        except ValueError:
+            continue
+        raise AssertionError(f"반영되면 안 돼요: {author} {body[:20]}")
+    assert not picks_path.exists()

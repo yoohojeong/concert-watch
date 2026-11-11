@@ -4,6 +4,7 @@
     python watch.py               # 확인 + 알림 + 웹페이지 갱신
     python watch.py --dry-run     # 알림을 보내지 않고 내용만 출력
     python watch.py --test-notify # 예시 공연으로 알림 채널 점검
+    python watch.py --apply-issue EVENT.json  # 웹페이지에서 연 '예매 계획' 이슈를 data/picks.json에 반영
 """
 from __future__ import annotations
 
@@ -18,21 +19,30 @@ from zoneinfo import ZoneInfo
 
 import yaml
 
-from concert_watch import notify, official, opentimes, reminders, site, sources
+from concert_watch import notify, official, opentimes, picks as picks_store, reminders, site, sources
 
 ROOT = Path(__file__).resolve().parent
 log = logging.getLogger("concert-watch")
 
 
 def load_picks(path: Path) -> dict:
-    """웹페이지에서 '예매할게요'로 고른 공연(data/picks.json). 봇은 읽기만 한다."""
-    if not path.exists():
-        return {}
-    try:
-        return json.loads(path.read_text(encoding="utf-8")).get("picks") or {}
-    except (json.JSONDecodeError, AttributeError):
-        log.error("data/picks.json을 읽지 못했어요")
-        return {}
+    """웹페이지에서 '예매할게요'로 고른 공연(data/picks.json)."""
+    return picks_store.load(path)
+
+
+def apply_issue(event_path: Path, picks_path: Path) -> str:
+    """GitHub 이슈 이벤트(JSON)의 예매 계획을 picks.json에 반영한다. 저장소 주인이 연 이슈만 받는다."""
+    event = json.loads(event_path.read_text(encoding="utf-8"))
+    issue = event.get("issue") or {}
+    owner = ((event.get("repository") or {}).get("owner") or {}).get("login")
+    author = (issue.get("user") or {}).get("login")
+    if not owner or author != owner:
+        raise ValueError(f"저장소 주인({owner})이 연 이슈만 반영해요. 작성자: {author}")
+    change = picks_store.parse_issue(issue.get("body") or "")
+    current = picks_store.load(picks_path)
+    result = picks_store.apply(current, change)
+    picks_store.save(picks_path, current)
+    return result
 
 
 def load_state(path: Path) -> dict:
@@ -178,12 +188,21 @@ def sample_event(today: dt.date) -> dict:
     }
 
 
+def _write_output(name: str, value: str) -> None:
+    """GitHub Actions 단계 출력(이슈 댓글에 쓴다)."""
+    out = os.environ.get("GITHUB_OUTPUT")
+    if out:
+        with open(out, "a", encoding="utf-8") as f:
+            f.write(f"{name}={value.replace(chr(10), ' ')}\n")
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description="콘서트 알리미")
     p.add_argument("--config", default=str(ROOT / "config.yaml"))
     p.add_argument("--dry-run", action="store_true", help="알림을 보내지 않고 내용만 출력")
     p.add_argument("--test-notify", action="store_true", help="예시 공연으로 알림 채널 점검")
     p.add_argument("--reminders-only", action="store_true", help="공연 확인 없이 예매 리마인더만 처리")
+    p.add_argument("--apply-issue", metavar="EVENT_JSON", help="예매 계획 이슈를 반영한 뒤 리마인더 처리")
     args = p.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
@@ -197,9 +216,19 @@ def main() -> int:
 
     state_path = ROOT / "data" / "state.json"
     state = load_state(state_path)
-    picks = load_picks(ROOT / "data" / "picks.json")
+    picks_path = ROOT / "data" / "picks.json"
+    if args.apply_issue:
+        try:
+            result = apply_issue(Path(args.apply_issue), picks_path)
+        except (ValueError, KeyError, json.JSONDecodeError) as e:
+            log.error("예매 계획을 반영하지 못했어요: %s", e)
+            _write_output("result", f"반영하지 못했어요: {e}")
+            return 1
+        log.info(result)
+        _write_output("result", result)
+    picks = load_picks(picks_path)
 
-    if args.reminders_only:
+    if args.reminders_only or args.apply_issue:
         reminders.process(cfg, picks, state, now, dry_run=args.dry_run)
         save_state(state_path, state)
         site.render(state, cfg, now, ROOT / "docs", picks=picks)
