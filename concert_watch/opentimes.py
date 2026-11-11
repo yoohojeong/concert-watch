@@ -1,7 +1,7 @@
 """예매 오픈 일시 자동 찾기.
 
 1. 공식 소식(인스타그램 글, 공식 사이트에 새로 생긴 줄)에서 예매 오픈 일시를 뽑는다.
-   ANTHROPIC_API_KEY가 있으면 Claude API로 읽고(형식이 제각각인 글, 영어 공지, '이번 주 금요일' 같은 표현까지),
+   OPENAI_API_KEY가 있으면 OpenAI API로 읽고(형식이 제각각인 글, 영어 공지, '이번 주 금요일' 같은 표현까지),
    없으면 "11월 20일(목) 오후 8시", "2026.11.20 20:00" 같은 한국어·숫자 형식만 규칙으로 찾는다.
 2. 공연마다 쓸 예매 오픈 일시(후보)를 고른다.
    - Ticketmaster 공연: Ticketmaster가 알려주는 선예매·일반 예매 시각
@@ -20,8 +20,8 @@ from zoneinfo import ZoneInfo
 import requests
 
 log = logging.getLogger(__name__)
-API_URL = "https://api.anthropic.com/v1/messages"
-DEFAULT_MODEL = "claude-haiku-5-5"
+API_URL = "https://api.openai.com/v1/chat/completions"
+DEFAULT_MODEL = "gpt-4o-mini"
 SOURCE_NAMES = {"instagram": "공식 인스타그램", "web": "공식 사이트"}
 
 SYSTEM_PROMPT = """You read concert announcements and extract when ticket sales open.
@@ -96,17 +96,19 @@ def _parse_json(text: str) -> dict:
     return json.loads(text[start:end + 1]) if start >= 0 else {}
 
 
-def extract_with_claude(text: str, artist: str, published: dt.datetime, default_tz: ZoneInfo,
+def extract_with_openai(text: str, artist: str, published: dt.datetime, default_tz: ZoneInfo,
                         api_key: str, model: str) -> list[dict]:
     prompt = (f"Artist: {artist}\nPost date: {published.isoformat(timespec='minutes')}\n\n"
               f"Text:\n{(text or '')[:6000]}")
     r = requests.post(API_URL, timeout=60, headers={
-        "x-api-key": api_key, "anthropic-version": "2023-06-01", "content-type": "application/json",
-    }, json={"model": model, "max_tokens": 1024, "system": SYSTEM_PROMPT,
-             "messages": [{"role": "user", "content": prompt}]})
+        "Authorization": f"Bearer {api_key}", "content-type": "application/json",
+    }, json={"model": model, "response_format": {"type": "json_object"},
+             "messages": [{"role": "system", "content": SYSTEM_PROMPT},
+                          {"role": "user", "content": prompt}]})
     if r.status_code >= 400:
-        raise RuntimeError(f"Claude API {r.status_code}: {r.text[:200]}")
-    reply = "".join(b.get("text", "") for b in r.json().get("content", []) if b.get("type") == "text")
+        raise RuntimeError(f"OpenAI API {r.status_code}: {r.text[:200]}")
+    choices = r.json().get("choices") or [{}]
+    reply = (choices[0].get("message") or {}).get("content") or ""
     found = []
     for item in (_parse_json(reply).get("open_times") or []):
         try:
@@ -120,20 +122,20 @@ def extract_with_claude(text: str, artist: str, published: dt.datetime, default_
         country = (item.get("country") or "").upper() or None
         found.append({"label": item.get("label") or "예매", "at": local.astimezone(dt.timezone.utc).isoformat(),
                       "country": country if country and len(country) == 2 else None,
-                      "city": item.get("city"), "evidence": (item.get("evidence") or "")[:80], "method": "claude"})
+                      "city": item.get("city"), "evidence": (item.get("evidence") or "")[:80], "method": "openai"})
     return _dedupe(found)
 
 
 def extract(text: str, artist: str, published: dt.datetime, cfg: dict) -> list[dict]:
     """공식 소식 원문에서 예매 오픈 일시 목록을 찾는다. 실패하면 규칙 방식으로 대신한다."""
     tz = ZoneInfo(cfg.get("timezone", "Asia/Seoul"))
-    key = os.environ.get("ANTHROPIC_API_KEY")
+    key = os.environ.get("OPENAI_API_KEY")
     if key:
         model = (cfg.get("open_time") or {}).get("model") or DEFAULT_MODEL
         try:
-            return extract_with_claude(text, artist, published, tz, key, model)
+            return extract_with_openai(text, artist, published, tz, key, model)
         except Exception as e:
-            log.warning("Claude로 예매 오픈 일시를 찾지 못해 규칙 방식으로 대신해요: %s", e)
+            log.warning("OpenAI로 예매 오픈 일시를 찾지 못해 규칙 방식으로 대신해요: %s", e)
     return extract_by_rules(text, published, tz)
 
 

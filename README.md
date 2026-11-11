@@ -71,11 +71,11 @@ GitHub에서 새 저장소를 **공개(Public)** 로 만들고 이 폴더의 파
 
 인스타그램을 연결하지 않아도 공식 웹사이트 감시와 공연 일정 API는 그대로 동작해요.
 
-### 6. 예매 오픈 일시 자동 찾기 (Claude API, 선택이지만 권장)
-새 공식 소식이 올라오면 Claude가 글을 읽고 팬클럽 선예매, 선예매, 일반 예매 시각을 뽑아요. "Tickets on sale this Friday 10am local time" 같은 영어 공지나 "이번 주 금요일" 같은 표현도 알아들어요.
+### 6. 예매 오픈 일시 자동 찾기 (OpenAI API, 선택이지만 권장)
+새 공식 소식이 올라오면 OpenAI 모델이 글을 읽고 팬클럽 선예매, 선예매, 일반 예매 시각을 뽑아요. "Tickets on sale this Friday 10am local time" 같은 영어 공지나 "이번 주 금요일" 같은 표현도 알아들어요.
 
-1. console.anthropic.com(Claude Console)에 가입하고 결제 수단을 등록한 뒤 API 키를 만드세요.
-2. Secret `ANTHROPIC_API_KEY`에 넣으세요.
+1. platform.openai.com에 가입하고 결제 수단(크레딧)을 등록한 뒤 API keys에서 키를 만드세요.
+2. Secret `OPENAI_API_KEY`에 넣으세요.
 
 새 공식 소식이 있을 때만 짧은 글 하나를 읽으므로 비용은 아주 적어요. 키가 없으면 "11월 20일(금) 오후 8시", "2026.11.20 20:00"처럼 한국어·숫자로 적힌 시간만 찾을 수 있어요. 사용할 모델은 `config.yaml`의 `open_time.model`에서 바꿀 수 있어요.
 

@@ -320,8 +320,8 @@ def test_tm_sale_times_include_presales():
     assert [t["label"] for t in times] == ["선예매(Artist Presale)", "일반 예매"]
 
 
-def test_claude_extraction_parses_reply_and_timezones(monkeypatch):
-    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test")
+def test_openai_extraction_parses_reply_and_timezones(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
     sent = {}
     reply = {"open_times": [
         {"label": "선예매", "date": "2026-11-18", "time": "10:00", "timezone": "Europe/London",
@@ -333,19 +333,19 @@ def test_claude_extraction_parses_reply_and_timezones(monkeypatch):
 
     def fake_post(url, **kw):
         sent.update(kw["json"], headers=kw["headers"])
-        return _FakeResp({"content": [{"type": "text", "text": "```json\n" + json.dumps(reply) + "\n```"}]})
+        return _FakeResp({"choices": [{"message": {"content": "```json\n" + json.dumps(reply) + "\n```"}}]})
 
     monkeypatch.setattr(opentimes.requests, "post", fake_post)
-    out = opentimes.extract("Presale Wed 10am London ...", "Coldplay", NOW, {"open_time": {"model": "claude-haiku-5-5"}})
-    assert sent["model"] == "claude-haiku-5-5" and sent["headers"]["x-api-key"] == "sk-test"
+    out = opentimes.extract("Presale Wed 10am London ...", "Coldplay", NOW, {"open_time": {"model": "gpt-4o-mini"}})
+    assert sent["model"] == "gpt-4o-mini" and sent["headers"]["Authorization"] == "Bearer sk-test"
     assert [(c["label"], c["at"][:16], c["country"]) for c in out] == [
         ("선예매", "2026-11-18T10:00", "GB"),          # 런던 10시 = UTC 10시(11월)
         ("일반 예매", "2026-11-20T11:00", "KR"),       # 서울 20시 = UTC 11시
     ]
 
 
-def test_claude_failure_falls_back_to_rules(monkeypatch):
-    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test")
+def test_openai_failure_falls_back_to_rules(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
     monkeypatch.setattr(opentimes.requests, "post", lambda *a, **k: _FakeResp({"error": "overloaded"}, 529))
     out = opentimes.extract("[서울 내한] 일반 예매: 11월 20일(금) 오후 8시", "Coldplay", NOW, {})
     assert out[0]["method"] == "rules" and out[0]["at"].startswith("2026-11-20T11:00")
@@ -420,7 +420,7 @@ def test_found_notice_only_for_times_found_after_pick(monkeypatch):
 
 
 def test_new_news_gets_open_times(monkeypatch):
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.setattr(notify, "dispatch", lambda *a, **k: None)
     item = {"key": "web:1", "kind": "announcement", "source": "web", "artist": "실리카겔", "title": "t",
             "summary": "s", "text": "단독 콘서트 서울\n티켓 오픈: 11월 20일(금) 오후 8시 멜론티켓", "url": "",

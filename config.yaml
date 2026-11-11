@@ -57,8 +57,8 @@ official:
              "공연", "콘서트", "투어", "내한", "티켓", "예매", "단독", "페스티벌", "선예매"]
 
 open_time:
-  # 공식 소식에서 예매 오픈 일시를 찾을 때 쓰는 Claude 모델(ANTHROPIC_API_KEY Secret이 있을 때)
-  model: claude-haiku-5-5
+  # 공식 소식에서 예매 오픈 일시를 찾을 때 쓰는 OpenAI 모델(OPENAI_API_KEY Secret이 있을 때)
+  model: gpt-4o-mini
 
 notify:
   email: true
