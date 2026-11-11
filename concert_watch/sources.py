@@ -262,8 +262,19 @@ def _strip_tags(s: str) -> str:
                     .replace("&gt;", ">").replace("&nbsp;", " ").split())
 
 
+def _site_get(session: requests.Session, url: str, tries: int = 3) -> requests.Response:
+    """예매처 페이지 요청. 일시 차단(423·429)이나 서버 오류면 점점 길게 쉬었다 다시 시도한다."""
+    for attempt in range(tries):
+        r = session.get(url, headers=MELON_HEADERS, timeout=TIMEOUT)
+        if r.status_code not in (423, 429) and r.status_code < 500:
+            return r
+        if attempt < tries - 1:
+            time.sleep(5 * (3 ** attempt))      # 5초, 15초
+    return r
+
+
 def melon_latest_id(session: requests.Session) -> int:
-    r = session.get(MELON_LIST, headers=MELON_HEADERS, timeout=TIMEOUT)
+    r = _site_get(session, MELON_LIST)
     r.raise_for_status()
     ids = [int(i) for i in re.findall(r"csoonId=(\d+)", r.text)]
     if not ids:
@@ -324,10 +335,14 @@ def fetch_melon(artists: list[dict], state: dict, session: requests.Session | No
     stop = min(latest, last + MELON_MAX_PER_RUN)
     for csoon_id in range(last + 1, stop + 1):
         time.sleep(MELON_PAUSE)
-        r = s.get(MELON_DETAIL.format(id=csoon_id), headers=MELON_HEADERS, timeout=TIMEOUT)
+        r = _site_get(s, MELON_DETAIL.format(id=csoon_id))
         if r.status_code == 404:
             continue
-        r.raise_for_status()
+        if not r.ok:
+            # 여기까지 본 것은 저장하고, 나머지는 다음 실행에서 이어서 본다
+            state["melon_last_id"] = csoon_id - 1
+            log.warning("멜론티켓 공지 %s에서 멈췄어요(HTTP %s). 다음에 이어서 볼게요", csoon_id, r.status_code)
+            return found
         notice = parse_melon_notice(r.text, csoon_id)
         if not notice:
             continue
@@ -405,7 +420,7 @@ def interpark_event(n: dict) -> dict:
 
 def fetch_interpark(artists: list[dict], session: requests.Session | None = None) -> list[dict]:
     s = session or requests.Session()
-    r = s.get(INTERPARK_LIST, headers=MELON_HEADERS, timeout=TIMEOUT)
+    r = _site_get(s, INTERPARK_LIST)
     r.raise_for_status()
     notices = parse_interpark_notices(r.text)
     if not notices:
