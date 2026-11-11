@@ -342,7 +342,7 @@ SCRIPT = r"""
     if (!isNaN(d)) el.textContent = `일반 예매 오픈 ${fmt(d)}`;
   });
 
-  // ── GitHub 저장: 저장된 계획은 공개 API로 읽고, 변경은 GitHub 이슈로 보낸다 ──
+  // ── 저장된 계획은 GitHub 공개 API로 읽는다(변경은 ntfy로 보낸다) ──
   const b64decode = (s) => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g, '')), (c) => c.charCodeAt(0)));
   const readPicks = async () => {
     const url = `https://api.github.com/repos/${DATA.repo}/contents/data/picks.json?ref=${encodeURIComponent(DATA.branch)}`;

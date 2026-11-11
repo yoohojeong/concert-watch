@@ -434,41 +434,22 @@ def test_new_news_gets_open_times(monkeypatch):
 from concert_watch import picks as picks_store  # noqa: E402
 
 
-def _issue_body(change):
-    return f"설명\n\n{picks_store.MARKER}\n```json\n{json.dumps(change, ensure_ascii=False)}\n```\n"
-
-
-def _event(tmp_path, body, author="me", owner="me"):
-    path = tmp_path / "event.json"
-    path.write_text(json.dumps({"issue": {"number": 1, "body": body, "user": {"login": author}},
-                                "repository": {"owner": {"login": owner}}}), encoding="utf-8")
-    return path
-
-
-def test_issue_sets_and_deletes_pick(tmp_path):
-    picks_path = tmp_path / "picks.json"
+def test_pick_change_is_validated_and_cancel_turns_off():
     pick = {"artist": "혁오", "title": "HYUKOH [33] TOUR", "mode": "manual", "open_at": "2026-11-12T11:00:00.000Z",
             "link": "javascript:alert(1)", "picked_at": "2026-11-12T00:00:00Z", "extra": "버려짐"}
-    msg = watch.apply_issue(_event(tmp_path, _issue_body({"action": "set", "key": "kopis:PF1", "pick": pick})), picks_path)
-    saved = picks_store.load(picks_path)["kopis:PF1"]
+    picks = {}
+    msg = picks_store.apply(picks, picks_store.validate_change({"action": "set", "key": "kopis:PF1", "pick": pick}))
+    saved = picks["kopis:PF1"]
     assert "혁오" in msg and saved["mode"] == "manual" and saved["link"] == "" and "extra" not in saved
-
-    watch.apply_issue(_event(tmp_path, _issue_body({"action": "delete", "key": "kopis:PF1"})), picks_path)
-    assert picks_store.load(picks_path)["kopis:PF1"]["mode"] == "off"      # 지우지 않고 꺼둔다
-    assert picks_store.active(picks_store.load(picks_path)) == {}
-
-
-def test_issue_from_other_user_or_bad_body_is_rejected(tmp_path):
-    picks_path = tmp_path / "picks.json"
-    good = _issue_body({"action": "set", "key": "k", "pick": {"mode": "auto"}})
-    for body, author in [(good, "stranger"), ("그냥 이슈", "me"),
-                         (_issue_body({"action": "set", "key": "k", "pick": {"mode": "manual", "open_at": "곧"}}), "me")]:
+    picks_store.apply(picks, picks_store.validate_change({"action": "delete", "key": "kopis:PF1"}))
+    assert picks["kopis:PF1"]["mode"] == "off" and picks_store.active(picks) == {}      # 지우지 않고 꺼둔다
+    for bad in [{"action": "set", "key": "k", "pick": {"mode": "manual", "open_at": "곧"}},
+                {"action": "hack", "key": "k"}, {"action": "add_artist", "name": "<script>"}]:
         try:
-            watch.apply_issue(_event(tmp_path, body, author=author), picks_path)
+            picks_store.validate_change(bad)
         except ValueError:
             continue
-        raise AssertionError(f"반영되면 안 돼요: {author} {body[:20]}")
-    assert not picks_path.exists()
+        raise AssertionError(f"받으면 안 돼요: {bad}")
 
 
 def test_news_search_baseline_then_only_fresh_announcements(monkeypatch):

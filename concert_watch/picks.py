@@ -1,8 +1,6 @@
 """예매 계획(data/picks.json) 읽기·쓰기.
 
-웹페이지의 '예매할게요'는 내용이 채워진 GitHub 이슈 작성 화면을 연다. 저장소 주인이 그 이슈를 제출하면
-GitHub Actions가 이슈 본문의 JSON을 읽어 data/picks.json에 반영하고 이슈를 닫는다.
-그래서 페이지에 GitHub 토큰을 넣을 필요가 없다(GitHub에 로그인만 돼 있으면 된다).
+웹페이지에서 바꾼 예매 계획은 ntfy를 거쳐 들어오고(concert_watch/remote.py), 여기서 검사해 data/picks.json에 반영한다.
 """
 from __future__ import annotations
 
@@ -15,7 +13,6 @@ from pathlib import Path
 from .notify import anchor_id
 
 log = logging.getLogger(__name__)
-MARKER = "<!-- concert-watch-pick -->"
 TEXT_FIELDS = ("artist", "title", "anchor", "country", "start", "link", "picked_at", "open_at", "mode")
 MAX_LEN = 500
 
@@ -34,16 +31,6 @@ def load(path: Path) -> dict:
 def save(path: Path, picks: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps({"picks": picks}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
-
-def parse_issue(body: str) -> dict:
-    """이슈 본문에서 예매 계획 변경을 꺼내 검사한다. 형식이 틀리면 ValueError."""
-    if MARKER not in (body or ""):
-        raise ValueError("예매 계획 이슈가 아니에요")
-    m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", body.split(MARKER, 1)[1], re.DOTALL)
-    if not m:
-        raise ValueError("이슈 본문에서 예매 계획을 찾지 못했어요")
-    return validate_change(json.loads(m.group(1)))
 
 
 def validate_change(data: dict) -> dict:

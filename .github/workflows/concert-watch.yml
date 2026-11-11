@@ -5,8 +5,6 @@ on:
     - cron: "*/5 * * * *"    # 5분마다: 웹페이지 변경은 바로 반영, 공연 확인은 1시간마다(watch.py --auto)
   push:
     paths: ["data/picks.json"]   # picks.json을 직접 고치면 바로 리마인더를 예약
-  issues:
-    types: [opened]              # 웹페이지의 '예매할게요'가 연 이슈를 picks.json에 반영
   workflow_dispatch:
     inputs:
       test_notify:
@@ -24,18 +22,12 @@ on:
 
 permissions:
   contents: write
-  issues: write
   actions: write       # 다음 실행을 스스로 시작하려고(5분 주기 이어달리기)
 
 jobs:
   watch:
-    # 이슈는 저장소 주인이 연 예매 계획 이슈만 처리(다른 사람이 연 이슈는 무시)
-    if: >-
-      github.event_name != 'issues' ||
-      (github.event.issue.user.login == github.repository_owner &&
-       contains(github.event.issue.body, '<!-- concert-watch-pick -->'))
     runs-on: ubuntu-latest
-    # 실행은 하나씩만. 건너뛴(남이 연 이슈) 실행은 여기 끼지 않아서 대기 중인 실행을 밀어내지 않는다.
+    # 실행은 하나씩만(대기 중인 실행은 하나만 남는다)
     concurrency:
       group: concert-watch
       cancel-in-progress: false
@@ -81,13 +73,8 @@ jobs:
         if: ${{ github.event_name == 'push' }}
         run: python watch.py --reminders-only
 
-      - name: 예매 계획 이슈 반영
-        id: pick
-        if: ${{ github.event_name == 'issues' }}
-        run: python watch.py --apply-issue "$GITHUB_EVENT_PATH"
-
       - name: 공연 확인
-        if: ${{ github.event_name != 'push' && github.event_name != 'issues' && !inputs.test_notify }}
+        if: ${{ github.event_name != 'push' && !inputs.test_notify }}
         run: python watch.py ${{ (github.event_name == 'schedule' || inputs.chain) && '--auto' || '' }} ${{ inputs.force_api && '--force-api' || '' }}
 
       - name: 결과 저장
@@ -97,24 +84,10 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/state.json docs; for f in data/picks.json data/artists.json; do [ -f "$f" ] && git add "$f"; done
           git diff --cached --quiet && exit 0
-          if [ "${{ github.event_name }}" = "issues" ]; then git commit -m "예매 계획 반영 (#${{ github.event.issue.number }})"
-          else git commit -m "공연 일정 갱신"; fi
+          git commit -m "공연 일정 갱신"
           # 그 사이 다른 실행이 올린 커밋과 합친다. 생성 파일이 겹치면 이번 실행 결과를 쓴다
           for i in 1 2 3; do git pull --rebase -X theirs && git push && exit 0; git rebase --abort 2>/dev/null; sleep 5; done
           exit 1
-
-      - name: 이슈 닫기
-        if: ${{ always() && github.event_name == 'issues' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RESULT: ${{ steps.pick.outputs.result }}
-          JOB_STATUS: ${{ job.status }}
-        run: |
-          if [ "$JOB_STATUS" = "success" ]; then
-            gh issue close "${{ github.event.issue.number }}" -R "$GITHUB_REPOSITORY" --comment "✅ ${RESULT}"
-          else
-            gh issue comment "${{ github.event.issue.number }}" -R "$GITHUB_REPOSITORY" --body "⚠️ ${RESULT:-저장하지 못했어요.} Actions 로그를 확인하세요."
-          fi
 
       # GitHub의 정기 실행(schedule)이 새 저장소에서 안 돌거나 밀리는 일이 있어서,
       # 실행이 끝나기 전에 약 5분 뒤 다음 실행을 직접 시작한다.
