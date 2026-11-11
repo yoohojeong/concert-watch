@@ -61,7 +61,7 @@ open_time:
   model: gpt-4o-mini
 
 notify:
-  email: true
+  email: false               # Gmail 설정(SMTP Secret) 후 true로
   sms: false
   sms_provider: solapi       # solapi(한국 번호) 또는 twilio(해외 번호)
   push: true                 # ntfy 앱 푸시
@@ -69,4 +69,4 @@ notify:
 
 site:
   title: 콘서트 알리미
-  url: ""                    # 예: https://내아이디.github.io/concert-watch/  (알림에 링크로 들어가요)
+  url: "https://yoohojeong.github.io/concert-watch/"
