@@ -76,6 +76,27 @@ def parse_kopis_list(xml_bytes: bytes, artist: dict) -> list[dict]:
     return events
 
 
+KOPIS_PAUSE = 0.5          # 요청 사이 쉬는 시간(초). 빠르게 연달아 부르면 400으로 거절하는 경우가 있다
+KOPIS_RETRIES = 3
+
+
+def _kopis_get(s: requests.Session, url: str, params: dict) -> requests.Response:
+    """KOPIS 요청. 잠깐 쉬었다 부르고, 거절·오류면 점점 길게 쉬며 다시 시도한다."""
+    for attempt in range(KOPIS_RETRIES):
+        time.sleep(KOPIS_PAUSE * (4 ** attempt))      # 0.5초, 2초, 8초
+        try:
+            r = s.get(url, params=params, headers=HEADERS, timeout=TIMEOUT)
+        except requests.RequestException:
+            if attempt == KOPIS_RETRIES - 1:
+                raise
+            continue
+        if r.status_code < 400:
+            return r
+        if attempt == KOPIS_RETRIES - 1:
+            raise SourceError(f"KOPIS {r.status_code}: {r.text.strip()[:200] or '응답 내용 없음'}")
+    raise SourceError("KOPIS 요청 실패")
+
+
 def fetch_kopis(artists: list[dict], today: dt.date, lookahead_days: int,
                 api_key: str, session: requests.Session | None = None) -> list[dict]:
     s = session or requests.Session()
@@ -88,7 +109,7 @@ def fetch_kopis(artists: list[dict], today: dt.date, lookahead_days: int,
                 stop = min(start + dt.timedelta(days=KOPIS_MAX_SPAN - 1), end)
                 page = 1
                 while True:
-                    r = s.get(f"{KOPIS_BASE}/pblprfr", params={
+                    r = _kopis_get(s, f"{KOPIS_BASE}/pblprfr", {
                         "service": api_key,
                         "stdate": start.strftime("%Y%m%d"),
                         "eddate": stop.strftime("%Y%m%d"),
@@ -96,8 +117,7 @@ def fetch_kopis(artists: list[dict], today: dt.date, lookahead_days: int,
                         "rows": KOPIS_ROWS,
                         "shprfnm": kw,
                         "shcate": KOPIS_GENRE_POP,
-                    }, headers=HEADERS, timeout=TIMEOUT)
-                    r.raise_for_status()
+                    })
                     if b"<dbs" not in r.content:
                         raise SourceError(f"예상과 다른 응답: {r.text[:200]}")
                     for e in parse_kopis_list(r.content, artist):
@@ -113,9 +133,7 @@ def enrich_kopis(event: dict, api_key: str, session: requests.Session | None = N
     """새 공연에 한해 상세 정보(예매처 링크, 공연 시간)를 채운다."""
     s = session or requests.Session()
     mt20id = event["key"].split(":", 1)[1]
-    r = s.get(f"{KOPIS_BASE}/pblprfr/{mt20id}", params={"service": api_key},
-              headers=HEADERS, timeout=TIMEOUT)
-    r.raise_for_status()
+    r = _kopis_get(s, f"{KOPIS_BASE}/pblprfr/{mt20id}", {"service": api_key})
     root = ET.fromstring(r.content)
     links = []
     for rel in root.iter("relate"):

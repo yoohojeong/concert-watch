@@ -6,6 +6,8 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import watch  # noqa: E402
+import concert_watch.sources as _src  # noqa: E402
+_src.KOPIS_PAUSE = 0  # 테스트에서는 쉬지 않음
 from concert_watch import notify, official, site, sources  # noqa: E402
 
 NOW = dt.datetime(2026, 11, 11, 14, 20, tzinfo=ZoneInfo("Asia/Seoul"))
