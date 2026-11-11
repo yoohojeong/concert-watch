@@ -123,10 +123,11 @@ def _news_item(n: dict) -> str:
 def _edit_info(site: dict) -> dict:
     """웹페이지에서 예매 계획을 바꿀 때 쓰는 ntfy 토픽과 비밀문구 확인값."""
     repo = os.environ.get("GITHUB_REPOSITORY") or site.get("repo", "")
+    need = bool(site.get("edit_passphrase", True))
     passphrase = os.environ.get("PICK_PASSPHRASE")
-    check = remote.check_value(remote.derive_key(passphrase, repo)) if passphrase and repo else ""
+    check = remote.check_value(remote.derive_key(passphrase, repo)) if need and passphrase and repo else ""
     return {"topic": site.get("edit_topic", ""), "server": (site.get("ntfy_server") or "https://ntfy.sh").rstrip("/"),
-            "check": check}
+            "passphrase": need, "check": check}
 
 
 def _page_data(shows: list[dict], news: list[dict], picks: dict, cfg: dict, state: dict) -> str:
@@ -440,7 +441,7 @@ SCRIPT = r"""
 
     f.link.value = (p && p.link) || item.link || '';
     f.remove.hidden = !p;
-    f.passField.hidden = !!ls.get(KEY_STORE);
+    f.passField.hidden = !DATA.edit.passphrase || !!ls.get(KEY_STORE);
     f.pass.value = '';
     f.save.textContent = p ? '변경 저장' : '저장';
     dlg.showModal();
@@ -448,7 +449,7 @@ SCRIPT = r"""
   };
 
   const ready = () => {
-    if (!DATA.repo || !DATA.edit.topic || !DATA.edit.check) {
+    if (!DATA.repo || !DATA.edit.topic || (DATA.edit.passphrase && !DATA.edit.check)) {
       f.error.textContent = '아직 비밀문구가 설정되지 않았어요. README의 "예매 계획 저장"대로 PICK_PASSPHRASE Secret을 넣어주세요.';
       return false;
     }
@@ -456,7 +457,7 @@ SCRIPT = r"""
   };
   const sendChange = async (change) => {
     let k = ls.get(KEY_STORE);
-    if (!(await keyOk(k))) {
+    if (DATA.edit.passphrase && !(await keyOk(k))) {
       ls.set(KEY_STORE, null);
       const pass = f.pass.value;
       if (!pass) { f.passField.hidden = false; f.pass.focus(); throw new Error('비밀문구를 넣어주세요.'); }
@@ -465,7 +466,8 @@ SCRIPT = r"""
       ls.set(KEY_STORE, k);
     }
     const m = JSON.stringify({ change, ts: Math.floor(Date.now() / 1000), nonce: hex(crypto.getRandomValues(new Uint8Array(12))) });
-    const r = await fetch(`${DATA.edit.server}/${DATA.edit.topic}`, { method: 'POST', body: JSON.stringify({ m, s: await hmacHex(k, m) }) });
+    const body = DATA.edit.passphrase ? { m, s: await hmacHex(k, m) } : { m };
+    const r = await fetch(`${DATA.edit.server}/${DATA.edit.topic}`, { method: 'POST', body: JSON.stringify(body) });
     if (!r.ok) throw new Error(`ntfy 응답 ${r.status}`);
     const pend = readPending();
     pend[change.key] = { change, at: Date.now() };

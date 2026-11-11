@@ -56,14 +56,19 @@ def fetch_messages(server: str, topic: str) -> list[dict]:
     return sorted(out, key=lambda m: m.get("time", 0))
 
 
-def verify(key: bytes, body: str, seen: set, now: float) -> dict:
-    """ntfy 메시지 본문을 확인하고 변경 내용을 돌려준다. 받을 수 없으면 ValueError."""
+def verify(key: bytes | None, body: str, seen: set, now: float) -> dict:
+    """ntfy 메시지 본문을 확인하고 변경 내용을 돌려준다. 받을 수 없으면 ValueError.
+
+    key가 None이면 서명을 확인하지 않는다(config site.edit_passphrase: false).
+    """
     try:
         outer = json.loads(body)
-        m, s = outer["m"], outer["s"]
-    except (json.JSONDecodeError, KeyError, TypeError):
+        m, s = outer["m"], outer.get("s", "")
+    except (json.JSONDecodeError, KeyError, TypeError, AttributeError):
         raise ValueError("형식이 다른 메시지") from None
-    if not isinstance(m, str) or not isinstance(s, str) or not hmac.compare_digest(sign(key, m), s.lower()):
+    if not isinstance(m, str):
+        raise ValueError("형식이 다른 메시지")
+    if key is not None and (not isinstance(s, str) or not hmac.compare_digest(sign(key, m), s.lower())):
         raise ValueError("서명이 맞지 않아요(비밀문구가 다르거나 남이 보낸 메시지)")
     inner = json.loads(m)
     nonce, ts = str(inner.get("nonce") or ""), inner.get("ts")
@@ -75,11 +80,14 @@ def verify(key: bytes, body: str, seen: set, now: float) -> dict:
     return {"change": change, "nonce": nonce}
 
 
-def apply_remote(picks: dict, state: dict, passphrase: str, repo: str, server: str, topic: str,
+def apply_remote(picks: dict, state: dict, passphrase: str | None, repo: str, server: str, topic: str,
                  now: float | None = None, messages: list[dict] | None = None) -> list[str]:
-    """ntfy 토픽에 올라온 예매 계획 변경을 picks에 반영하고 결과 문장 목록을 돌려준다."""
+    """ntfy 토픽에 올라온 예매 계획 변경을 picks에 반영하고 결과 문장 목록을 돌려준다.
+
+    passphrase가 None이면 서명 없이 받는다(누구나 바꿀 수 있음).
+    """
     now = now or time.time()
-    key = derive_key(passphrase, repo)
+    key = derive_key(passphrase, repo) if passphrase is not None else None
     if messages is None:
         messages = fetch_messages(server, topic)
     seen_list = state.setdefault("remote_nonces", [])

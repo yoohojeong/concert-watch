@@ -524,3 +524,12 @@ def test_remote_edit_signed_by_passphrase_only():
     assert run(forged) == [] and picks == {}
     assert len(run(good)) == 1 and picks["melon:1"]["artist"] == "혁오"
     assert run(good) == []                                            # 같은 메시지는 한 번만
+
+
+def test_remote_edit_without_passphrase_accepts_unsigned():
+    import time as _t
+    from concert_watch import remote
+    m = json.dumps({"change": {"action": "delete", "key": "melon:1"}, "ts": int(_t.time()), "nonce": "n2"})
+    picks, state = {"melon:1": {"artist": "혁오", "mode": "auto"}}, {}
+    done = remote.apply_remote(picks, state, None, "me/repo", "", "", messages=[{"message": json.dumps({"m": m})}])
+    assert len(done) == 1 and picks["melon:1"]["mode"] == "off"

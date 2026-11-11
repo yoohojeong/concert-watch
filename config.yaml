@@ -78,3 +78,4 @@ site:
   url: "https://yoohojeong.github.io/concert-watch/"
   # 웹페이지에서 예매 계획을 바꿀 때 쓰는 ntfy 토픽. 공개돼도 괜찮아요(비밀문구 서명이 없으면 무시).
   edit_topic: cw-edit-33ccaeb746e846eb
+  edit_passphrase: false     # false면 비밀문구 없이 누구나 바꿀 수 있어요. true면 PICK_PASSPHRASE 서명이 필요해요

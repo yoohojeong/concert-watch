@@ -198,10 +198,15 @@ def sample_event(today: dt.date) -> dict:
 def apply_remote_edits(cfg: dict, state: dict, all_picks: dict) -> bool:
     """웹페이지에서 비밀문구로 보낸 예매 계획 변경(ntfy)을 반영한다. 바뀐 게 있으면 True."""
     site_cfg = cfg.get("site") or {}
-    passphrase = os.environ.get("PICK_PASSPHRASE")
     topic = site_cfg.get("edit_topic")
     repo = os.environ.get("GITHUB_REPOSITORY") or site_cfg.get("repo", "")
-    if not (passphrase and topic and repo):
+    if site_cfg.get("edit_passphrase", True):
+        passphrase = os.environ.get("PICK_PASSPHRASE")
+        if not passphrase:
+            return False
+    else:
+        passphrase = None          # 비밀문구 없이 누구나 바꿀 수 있음
+    if not (topic and repo):
         return False
     try:
         return bool(remote.apply_remote(all_picks, state, passphrase, repo,
