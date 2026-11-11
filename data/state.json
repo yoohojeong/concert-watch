@@ -1,0 +1,196 @@
+{
+  "announcements": {},
+  "artists_seen": [
+    "Coldplay",
+    "Green Day",
+    "Oasis",
+    "실리카겔",
+    "혁오"
+  ],
+  "auto_found": {},
+  "events": {
+    "tm:1AvZZ_4GkDeDQk4": {
+      "artist": "혁오",
+      "city": "Toronto",
+      "country": "CA",
+      "end": "2027-04-07",
+      "first_seen": "2026-11-12T00:37:09+09:00",
+      "key": "tm:1AvZZ_4GkDeDQk4",
+      "sale_start": "2026-11-12T15:00:00Z",
+      "sale_times": [
+        {
+          "at": "2026-11-10T15:00:00Z",
+          "label": "선예매(LIVE NATION PRESALE)"
+        },
+        {
+          "at": "2026-11-12T15:00:00Z",
+          "label": "일반 예매"
+        }
+      ],
+      "source": "ticketmaster",
+      "start": "2027-04-07",
+      "ticket_links": [
+        {
+          "name": "Ticketmaster",
+          "url": "https://www.ticketmaster.ca/hyukoh-33-tour-toronto-ontario-04-07-2027/event/1000655EC2EDA195"
+        }
+      ],
+      "time": "19:00",
+      "title": "HYUKOH [33] TOUR",
+      "url": "https://www.ticketmaster.ca/hyukoh-33-tour-toronto-ontario-04-07-2027/event/1000655EC2EDA195",
+      "venue": "The Danforth Music Hall"
+    },
+    "tm:k7vGF_pF1pwN0": {
+      "artist": "혁오",
+      "city": "Brooklyn",
+      "country": "US",
+      "end": "2027-04-09",
+      "first_seen": "2026-11-12T00:37:09+09:00",
+      "key": "tm:k7vGF_pF1pwN0",
+      "sale_start": "2026-11-12T15:00:00Z",
+      "sale_times": [
+        {
+          "at": "2026-11-10T17:00:00Z",
+          "label": "선예매(LIVE NATION PRESALE)"
+        },
+        {
+          "at": "2026-11-10T17:00:00Z",
+          "label": "선예매(Citi® Cardmember Presale)"
+        },
+        {
+          "at": "2026-11-12T15:00:00Z",
+          "label": "선예매(Citi® Cardmember Preferred)"
+        },
+        {
+          "at": "2026-11-12T15:00:00Z",
+          "label": "일반 예매"
+        }
+      ],
+      "source": "ticketmaster",
+      "start": "2027-04-09",
+      "ticket_links": [
+        {
+          "name": "Ticketmaster",
+          "url": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4"
+        }
+      ],
+      "time": "19:00",
+      "title": "Hyukoh",
+      "url": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4",
+      "venue": "Brooklyn Paramount"
+    }
+  },
+  "instagram_seen": {},
+  "last_api_check": "2026-11-12T00:37:09+09:00",
+  "last_api_errors": [],
+  "last_checked": "2026-11-12T00:37:09+09:00",
+  "last_errors": [
+    "공식 사이트 https://www.coldplay.com/tour/(HTTPError)",
+    "공식 사이트 https://hyukoh.com/(SSLError)",
+    "공식 사이트 https://msbsound.com/artist/silica-gel(SourceError)",
+    "공식 사이트 https://www.greenday.com/(SourceError)"
+  ],
+  "page_seen": {
+    "https://oasisinet.com/": [
+      "34c808d0a63f277e",
+      "55de88709232ec03",
+      "7a5ee4290bc9fc5b",
+      "8fa41d59c259d95c",
+      "712f55c8b89864b6",
+      "8670cb1f9e9406f8",
+      "65c821a596ceec1c",
+      "5552fd312f05d9aa",
+      "967649ba116568fa",
+      "b66806f4d55c4a9e",
+      "cbe648909034c062",
+      "d5244a331aad290f",
+      "8d7624972d21c275",
+      "8a1621dae39bf1d9",
+      "c91e11a1f2a2f6f2",
+      "c94456d225d310aa",
+      "e049eafce23a31be",
+      "e77a9cb807b123b8",
+      "978cba0e335b66c8",
+      "d4a64fc9d416b4e0",
+      "e29d47ee112df691",
+      "008aced61800a16f",
+      "ffe2f4b77f9f2ac3",
+      "1ea1b8d6490d7bb0",
+      "b9c2191193ebdc55",
+      "9b1adfca768088d4",
+      "ee849c5647660b2c",
+      "42507dd3b0941dcb",
+      "564d26780ad198bb",
+      "d5c48ba35265b499",
+      "e0b83b503dcffa88",
+      "f387e136d99dca92",
+      "65c690bd94fa9778",
+      "83df547e6ed5ee13",
+      "fb02e6a907c3f414",
+      "0c2be040d9de8833",
+      "043ecf6cf75621b0",
+      "fd7dff11a837ce12",
+      "4d9597887b275944",
+      "1b9f74a17918990f",
+      "529baa7788b67e0b",
+      "533573b9dd20c5fa",
+      "d87ef788623517b4",
+      "666367cd820fd0ea",
+      "08e149daab97167b",
+      "ab9dcd4a0295bd5e",
+      "85ff4aec914eaa0b",
+      "f43490c8e07ab399",
+      "69bd4ef9fbd0894a",
+      "74ca35807909c7c1",
+      "61773614a2854044",
+      "15ae60c0c77fc6ad",
+      "bec5adfabe857fec",
+      "caf8c391bd695cbe",
+      "3ef58754ec38c9c3",
+      "4425f1ba0e297258",
+      "76d4cc8d1ea378a4",
+      "393a56e455051068",
+      "4e115e2b503ed6d6",
+      "3a8065a6d31771c3",
+      "9ffa7cb965fa49b5",
+      "cc7c5ec61d900c10",
+      "287b9e413256a944",
+      "683fabba3c11de69",
+      "55eb0c35d67ea89a",
+      "940eda61ec56a7a9",
+      "a7c7279badddc3f0",
+      "478155863bb82b5a",
+      "cd95b41f85ddc092",
+      "2a0cb6b42add7808",
+      "06580f39a051b4e6",
+      "52c5438944ae936c",
+      "aa60b3681a8c998e",
+      "387e281ae3141514",
+      "683401baaae75ee9",
+      "558865a16feb9f75",
+      "48adc90b2695de2c",
+      "e4a264eb2ce1b971",
+      "e0d73143de80d17e",
+      "bce06414177f72ab",
+      "d6981f74767d6c63",
+      "c29220f9585cc461",
+      "a35b29c64c5ce3d2",
+      "9db108ba6b7f6571",
+      "a55a275aa676930d",
+      "994578e03d1b2fac",
+      "d612d68f92d35f87",
+      "b68b84274d99a1f9",
+      "bc9ef1f974dbea96",
+      "1b47c688bcc825ce",
+      "0b088941ade86b8e",
+      "52982b980ca056e2",
+      "0240153eb799bcb2",
+      "96cd4a75022bd487",
+      "255b9ed7adb67017",
+      "1f6b80998614c85c",
+      "d188cc75875c9eb7",
+      "f13bffb6db37fc57"
+    ]
+  },
+  "reminders": {}
+}
