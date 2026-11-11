@@ -106,10 +106,17 @@ def merge(state: dict, events: list[dict], now_iso: str) -> list[dict]:
 
 
 def run(cfg: dict, state: dict, now: dt.datetime, events: list[dict] | None, errors: list[str],
-        news: list[dict] | None = None, dry_run: bool = False, enrich=None) -> list[dict]:
+        news: list[dict] | None = None, dry_run: bool = False, enrich=None,
+        hourly_events: list[dict] | None = None) -> list[dict]:
     """수집 결과를 반영하고 알림을 보낸다. events가 None이면 이번 회차는 공연 API를 건너뛴 것."""
     seen_artists = set(state.get("artists_seen") or [])
     to_notify: list[dict] = []
+
+    # 매시간 확인하는 소스(멜론티켓 공지). 이미 추적하던 아티스트의 새 공연은 바로 알린다.
+    if hourly_events:
+        for e in merge(state, hourly_events, now.isoformat(timespec="seconds")):
+            if (cfg.get("notify") or {}).get("on_first_run", False) or e["artist"] in seen_artists:
+                to_notify.append(e)
 
     if events is not None:
         new = merge(state, events, now.isoformat(timespec="seconds"))
@@ -123,7 +130,7 @@ def run(cfg: dict, state: dict, now: dt.datetime, events: list[dict] | None, err
         # 처음 추가한 아티스트는 '지금 있는 공연'을 기준선으로 삼고, 이후 새로 뜨는 공연만 알린다.
         on_first = (cfg.get("notify") or {}).get("on_first_run", False)
         to_notify = sorted(
-            (e for e in new if on_first or e["artist"] in seen_artists),
+            to_notify + [e for e in new if on_first or e["artist"] in seen_artists],
             key=lambda e: (e.get("start", ""), e["artist"]),
         )
         if len(new) > len(to_notify):
@@ -242,12 +249,18 @@ def main() -> int:
         log.info("공연 API는 %s시간마다 확인해요. 이번에는 공식 채널만 확인할게요",
                  cfg.get("api_interval_hours", 3))
     news, news_errors = official.check(cfg, state, now)
+    melon: list[dict] = []
+    try:
+        melon = sources.fetch_melon(cfg.get("artists") or [], state)
+    except Exception as e:
+        news_errors.append(f"멜론티켓({e.__class__.__name__})")
+        log.error("멜론티켓 티켓오픈소식 확인 실패: %s", e)
 
     kopis_key = os.environ.get("KOPIS_API_KEY")
     enrich = (lambda e: sources.enrich_kopis(e, kopis_key)
               if e["source"] == "kopis" else None) if kopis_key else None
 
-    run(cfg, state, now, events, errors, news=news, dry_run=args.dry_run, enrich=enrich)
+    run(cfg, state, now, events, errors, news=news, dry_run=args.dry_run, enrich=enrich, hourly_events=melon)
     reminders.process(cfg, picks, state, now, dry_run=args.dry_run)
     state["last_errors"] = (state.get("last_api_errors") or []) + news_errors
     save_state(state_path, state)

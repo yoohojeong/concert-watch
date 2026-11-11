@@ -8,6 +8,7 @@ from __future__ import annotations
 import datetime as dt
 import logging
 import os
+import re
 import time
 import xml.etree.ElementTree as ET
 
@@ -237,3 +238,113 @@ def fetch_ticketmaster(artists: list[dict], today: dt.date, lookahead_days: int,
                 if page >= min(data.get("page", {}).get("totalPages", 1), 10):
                     break
     return list(found.values())
+
+
+# ── 멜론티켓 티켓오픈소식 ─────────────────────────────────
+# 공식 API가 없어 '티켓오픈소식' 공지 페이지를 읽는다. 공지 번호(csoonId)가 차례로 늘어나므로
+# 지난번에 본 번호 다음부터 새 공지를 확인한다. KOPIS보다 먼저, 예매 오픈 시각까지 나온다.
+MELON_BASE = "https://ticket.melon.com"
+MELON_LIST = MELON_BASE + "/csoon/ajax/listTicketOpen.htm?orderType=0&pageIndex=1&schGcode=GENRE_CON_ALL"
+MELON_DETAIL = MELON_BASE + "/csoon/detail.htm?csoonId={id}"
+MELON_PRODUCT = MELON_BASE + "/performance/index.htm?prodId={id}"
+MELON_BACKFILL = 150      # 처음 돌릴 때 거슬러 올라가 볼 공지 수(약 2~3주)
+MELON_MAX_PER_RUN = 80
+MELON_PAUSE = 0.3
+MELON_HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36", "Accept-Language": "ko-KR,ko;q=0.9"}
+_KST = dt.timezone(dt.timedelta(hours=9))
+_KO_DATETIME = re.compile(r"(20\d{2})년\s*(\d{1,2})월\s*(\d{1,2})일[^0-9]*?(\d{1,2}):(\d{2})")
+_KO_DATE = re.compile(r"(20\d{2})년\s*(\d{1,2})월\s*(\d{1,2})일")
+
+
+def _strip_tags(s: str) -> str:
+    return " ".join(re.sub(r"<[^>]+>", " ", s or "").replace("&amp;", "&").replace("&lt;", "<")
+                    .replace("&gt;", ">").replace("&nbsp;", " ").split())
+
+
+def melon_latest_id(session: requests.Session) -> int:
+    r = session.get(MELON_LIST, headers=MELON_HEADERS, timeout=TIMEOUT)
+    r.raise_for_status()
+    ids = [int(i) for i in re.findall(r"csoonId=(\d+)", r.text)]
+    if not ids:
+        raise SourceError("멜론티켓 티켓오픈소식 목록을 읽지 못했어요")
+    return max(ids)
+
+
+def parse_melon_notice(html: str, csoon_id: int) -> dict | None:
+    """멜론티켓 티켓오픈 공지 한 건. 공지가 없거나 형식이 다르면 None."""
+    m = re.search(r'<p class="tit">(.*?)</p>', html, re.S)
+    if not m:
+        return None
+    title = re.sub(r"\s*티켓\s*오픈\s*안내\s*$", "", _strip_tags(m.group(1)))
+    sale_times = []
+    for label, when in re.findall(r'class="tit_type">(.*?)</dt>\s*<dd class="txt_date">(.*?)</dd>', html, re.S):
+        d = _KO_DATETIME.search(_strip_tags(when))
+        if not d:
+            continue
+        y, mo, da, h, mi = map(int, d.groups())
+        at = dt.datetime(y, mo, da, h, mi, tzinfo=_KST).astimezone(dt.timezone.utc).isoformat()
+        label = _strip_tags(label)
+        label = "일반 예매" if label.replace(" ", "") in ("티켓오픈", "일반예매") else label
+        sale_times.append({"label": label, "at": at})
+    singers = [_strip_tags(s) for s in re.findall(r'class="singer">(.*?)</strong>', html, re.S)]
+    text = _strip_tags(re.sub(r"<script.*?</script>|<style.*?</style>", " ", html, flags=re.S))
+    start = end = ""
+    pm = re.search(r"공연\s*(?:일|기간|일시)\s*:\s*([^-]{0,80})", text)
+    if pm and (d := _KO_DATE.search(pm.group(1))):
+        first = dt.date(*map(int, d.groups()))
+        start = end = first.isoformat()
+        # "2027년 1월 16일(토) 18시 / 17일(일) 17시"처럼 이어지는 날짜는 같은 달로 본다
+        days = [int(x) for x in re.findall(r"(\d{1,2})일", pm.group(1)[d.end() - 3:])]
+        if days and max(days) > first.day:
+            try:
+                end = first.replace(day=max(days)).isoformat()
+            except ValueError:
+                pass
+    vm = re.search(r"공연\s*장소\s*:\s*(.+?)(?:\s+-\s|\s+티켓\s*가격|\s+기획사|$)", text)
+    prod = re.search(r"bannerLanding\('TD',\s*'(\d+)'\)", html)
+    url = MELON_DETAIL.format(id=csoon_id)
+    return {
+        "key": f"melon:{csoon_id}", "source": "melon", "title": title,
+        "start": start, "end": end, "time": "", "venue": (vm.group(1).strip()[:80] if vm else ""),
+        "city": "", "country": "KR", "url": url,
+        "ticket_links": [{"name": "멜론티켓", "url": MELON_PRODUCT.format(id=prod.group(1)) if prod else url}],
+        "sale_start": next((c["at"] for c in sale_times if c["label"] == "일반 예매"), ""),
+        "sale_times": sorted(sale_times, key=lambda c: c["at"]),
+        "_match_text": " ".join([title] + singers),
+    }
+
+
+def _melon_artist(notice: dict, artists: list[dict]) -> dict | None:
+    hay = notice["_match_text"].lower()
+    for a in artists:
+        words = [a["name"], a.get("ticketmaster_keyword") or ""] + list(a.get("kopis_keywords") or [])
+        if any(w and w.lower() in hay for w in words) and \
+                not any(x and x.lower() in hay for x in a.get("exclude_keywords") or []):
+            return a
+    return None
+
+
+def fetch_melon(artists: list[dict], state: dict, session: requests.Session | None = None) -> list[dict]:
+    """지난번 이후 새로 올라온 멜론티켓 티켓오픈 공지 중 추적 중인 아티스트 공연."""
+    s = session or requests.Session()
+    latest = melon_latest_id(s)
+    last = int(state.get("melon_last_id") or (latest - MELON_BACKFILL))
+    found = []
+    stop = min(latest, last + MELON_MAX_PER_RUN)
+    for csoon_id in range(last + 1, stop + 1):
+        time.sleep(MELON_PAUSE)
+        r = s.get(MELON_DETAIL.format(id=csoon_id), headers=MELON_HEADERS, timeout=TIMEOUT)
+        if r.status_code == 404:
+            continue
+        r.raise_for_status()
+        notice = parse_melon_notice(r.text, csoon_id)
+        if not notice:
+            continue
+        artist = _melon_artist(notice, artists)
+        if artist:
+            notice.pop("_match_text")
+            notice["artist"] = artist["name"]
+            found.append(notice)
+            log.info("멜론티켓 공지 %s: %s %s", csoon_id, artist["name"], notice["title"])
+    state["melon_last_id"] = stop
+    return found
