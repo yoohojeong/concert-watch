@@ -2,31 +2,31 @@
   "updated": "2026-11-12T01:54:49+09:00",
   "events": [
     {
-      "key": "melon:13227",
-      "source": "melon",
-      "title": "HYUKOH [33] TOUR - SEOUL",
-      "start": "2027-01-16",
-      "end": "2027-01-17",
-      "time": "",
-      "venue": "올림픽공원 올림픽홀",
+      "artist": "혁오",
       "city": "",
       "country": "KR",
-      "url": "https://ticket.melon.com/csoon/detail.htm?csoonId=13227",
+      "end": "2027-01-17",
+      "first_seen": "2026-11-12T01:54:49+09:00",
+      "key": "melon:13227",
+      "sale_start": "2026-11-12T11:00:00+00:00",
+      "sale_times": [
+        {
+          "at": "2026-11-12T11:00:00+00:00",
+          "label": "일반 예매"
+        }
+      ],
+      "source": "melon",
+      "start": "2027-01-16",
       "ticket_links": [
         {
           "name": "멜론티켓",
           "url": "https://ticket.melon.com/performance/index.htm?prodId=214266"
         }
       ],
-      "sale_start": "2026-11-12T11:00:00+00:00",
-      "sale_times": [
-        {
-          "label": "일반 예매",
-          "at": "2026-11-12T11:00:00+00:00"
-        }
-      ],
-      "artist": "혁오",
-      "first_seen": "2026-11-12T01:54:49+09:00"
+      "time": "",
+      "title": "HYUKOH [33] TOUR - SEOUL",
+      "url": "https://ticket.melon.com/csoon/detail.htm?csoonId=13227",
+      "venue": "올림픽공원 올림픽홀"
     },
     {
       "artist": "혁오",
