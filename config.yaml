@@ -18,7 +18,7 @@ artists:
     ticketmaster_keyword: Coldplay
     exclude_keywords: ["트리뷰트", "tribute", "커버", "헌정"]
     instagram: coldplay
-    official_pages: ["https://www.coldplay.com/tour/"]
+    official_pages: []        # coldplay.com은 봇 접속을 막아요(403)
 
   - name: Oasis
     kopis_keywords: ["Oasis", "오아시스"]
@@ -32,21 +32,21 @@ artists:
     ticketmaster_keyword: HYUKOH
     exclude_keywords: ["트리뷰트", "커버", "헌정"]
     instagram: hyukohofficial
-    official_pages: ["https://hyukoh.com/"]
+    official_pages: ["http://www.hyukoh.com/"]   # https는 인증서 오류라 http로
 
   - name: 실리카겔
     kopis_keywords: ["실리카겔", "Silica Gel"]
     ticketmaster_keyword: Silica Gel
     exclude_keywords: ["트리뷰트", "커버", "헌정"]
     instagram: silicagel.official
-    official_pages: ["https://msbsound.com/artist/silica-gel"]
+    official_pages: ["https://msbsound.com/"]   # 소속사 홈(아티스트 페이지는 404)
 
   - name: Green Day
     kopis_keywords: ["그린데이", "Green Day"]
     ticketmaster_keyword: Green Day
     exclude_keywords: ["트리뷰트", "tribute", "커버", "헌정"]
     instagram: greenday
-    official_pages: ["https://www.greenday.com/"]
+    official_pages: []        # greenday.com은 자바스크립트로 그려서 읽을 수 없어요
 
 ticketmaster:
   countries: []              # 비우면 전 세계. 특정 나라만 보려면 예: ["US", "GB", "JP"]
