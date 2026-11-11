@@ -81,13 +81,10 @@
     }
   },
   "instagram_seen": {},
-  "last_api_check": "2026-11-12T01:08:20+09:00",
-  "last_api_errors": [
-    "KOPIS(HTTPError)"
-  ],
-  "last_checked": "2026-11-12T01:08:20+09:00",
+  "last_api_check": "2026-11-12T01:09:38+09:00",
+  "last_api_errors": [],
+  "last_checked": "2026-11-12T01:09:38+09:00",
   "last_errors": [
-    "KOPIS(HTTPError)",
     "공식 사이트 https://msbsound.com/(SourceError)"
   ],
   "page_seen": {
