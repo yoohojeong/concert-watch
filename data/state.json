@@ -70,6 +70,37 @@
       "url": "https://www.ticketmaster.ca/hyukoh-33-tour-toronto-ontario-04-07-2027/event/1000655EC2EDA195",
       "venue": "The Danforth Music Hall"
     },
+    "tm:Z8ymWIMJlyZgcZ7aFd": {
+      "artist": "빅뱅",
+      "city": "",
+      "country": "PH",
+      "end": "2027-02-20",
+      "first_seen": "2026-11-12T02:44:03+09:00",
+      "key": "tm:Z8ymWIMJlyZgcZ7aFd",
+      "sale_start": "2026-09-21T02:00:00Z",
+      "sale_times": [
+        {
+          "at": "2026-09-17T02:00:00Z",
+          "label": "선예매"
+        },
+        {
+          "at": "2026-09-21T02:00:00Z",
+          "label": "일반 예매"
+        }
+      ],
+      "source": "ticketmaster",
+      "start": "2027-02-20",
+      "ticket_links": [
+        {
+          "name": "Ticketmaster",
+          "url": "https://ticketmaster.ph/ticket/area/27ph_bigbang2027/3872"
+        }
+      ],
+      "time": "19:00",
+      "title": "BIGBANG 2026-2027 WORLD TOUR < XX : COSMOS > IN MANILA",
+      "url": "https://ticketmaster.ph/ticket/area/27ph_bigbang2027/3872",
+      "venue": "SMDC Festival Grounds"
+    },
     "tm:k7vGF_pF1pwN0": {
       "artist": "혁오",
       "city": "Brooklyn",
@@ -108,15 +139,60 @@
       "title": "Hyukoh",
       "url": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4",
       "venue": "Brooklyn Paramount"
+    },
+    "tm:vvG1IZ_4D3i_nG": {
+      "artist": "빅뱅",
+      "city": "Inglewood",
+      "country": "US",
+      "end": "2027-03-13",
+      "first_seen": "2026-11-12T02:44:03+09:00",
+      "key": "tm:vvG1IZ_4D3i_nG",
+      "sale_start": "2026-11-13T18:00:00Z",
+      "sale_times": [
+        {
+          "at": "2026-11-11T18:00:00Z",
+          "label": "선예매(B.Stage Presale)"
+        },
+        {
+          "at": "2026-11-11T18:00:00Z",
+          "label": "선예매(VIP Package Presale)"
+        },
+        {
+          "at": "2026-11-12T18:00:00Z",
+          "label": "선예매(Venue Presale)"
+        },
+        {
+          "at": "2026-11-12T18:00:00Z",
+          "label": "선예매(VIP Packages Onsale)"
+        },
+        {
+          "at": "2026-11-12T18:00:00Z",
+          "label": "선예매(VIP Package Presale)"
+        },
+        {
+          "at": "2026-11-13T18:00:00Z",
+          "label": "일반 예매"
+        }
+      ],
+      "source": "ticketmaster",
+      "start": "2027-03-13",
+      "ticket_links": [
+        {
+          "name": "Ticketmaster",
+          "url": "https://www.ticketmaster.com/bigbang-2027-world-tour-inglewood-california-03-13-2027/event/0A00655ED2B19A8C"
+        }
+      ],
+      "time": "19:00",
+      "title": "BIGBANG 2027 World Tour",
+      "url": "https://www.ticketmaster.com/bigbang-2027-world-tour-inglewood-california-03-13-2027/event/0A00655ED2B19A8C",
+      "venue": "SoFi Stadium"
     }
   },
   "instagram_seen": {},
-  "last_api_check": "2026-11-12T02:30:03+09:00",
+  "last_api_check": "2026-11-12T02:44:03+09:00",
   "last_api_errors": [],
-  "last_checked": "2026-11-12T02:35:07+09:00",
-  "last_errors": [
-    "멜론티켓(HTTPError)"
-  ],
+  "last_checked": "2026-11-12T02:44:03+09:00",
+  "last_errors": [],
   "melon_last_id": 13262,
   "page_seen": {
     "http://www.hyukoh.com/": [
@@ -227,6 +303,110 @@
       "d188cc75875c9eb7",
       "f13bffb6db37fc57"
     ],
+    "news:빅뱅": [
+      "edc085a90e27e0b3",
+      "995efd2cce4d98c5",
+      "29b09a14b31038b1",
+      "f420b7e92dc401e0",
+      "7fb7ad78fa11f182",
+      "76494f9db6488da3",
+      "59b3c7c31d975994",
+      "cb90df598cb81b39",
+      "b82c243d5b7fbb46",
+      "fc5bc0e571e2f4d5",
+      "5f6bf0bed9f219d3",
+      "3b0293836ac2510c",
+      "e036473db8769e67",
+      "2ec2a404c6fd484e",
+      "ab5203e2fa334eac",
+      "e5b8bd95d43380c9",
+      "f87e5d46bc27c051",
+      "52fc3e8891e92ac7",
+      "cdcf2d7f5f5f8f6f",
+      "1455f582e2894ff1",
+      "a8fcad0872bc7be4",
+      "c46a86c65dd96b24",
+      "680247bb58e8dfc9",
+      "3e3f5fa37a4fb946",
+      "cf6bce462abab3a9",
+      "68b00c50652c3583",
+      "74922b9483e78493",
+      "73d54fdd57af78c5",
+      "7317594555316d2f",
+      "db8f177eb190888c",
+      "232a5b66130faf67",
+      "d0808af4519d7645",
+      "89c02cf14ea60aa8",
+      "7fa17c611c13006d",
+      "8aad773f675d4cce",
+      "612580bfb3c82c46",
+      "94d0ecdf32403384",
+      "0ad7fc609e5d19b7",
+      "e55bc2407e495771",
+      "0c8c18ad82f519b6",
+      "f128285081e93894",
+      "8399966e47bec2ff",
+      "cde223a565e12e33",
+      "a8c98fd62612de43",
+      "af361c04f71c5480",
+      "5c22c94fc9692456",
+      "098e90bc2d9d1930",
+      "5926502f269f09af",
+      "78c3728f26f18778",
+      "354a02b2f75a953e",
+      "e4c1c4a6c57183a7",
+      "7d304aaf4eb0b01d",
+      "bfd122d688d4c762",
+      "9a67844160b3d6ba",
+      "fcc71eed5ee7ec3e",
+      "146d25e41c876bf7",
+      "178de28386bc1601",
+      "edc590058be3390a",
+      "68d75809d5f3491c",
+      "f6024061a576c2b9",
+      "89be4dfc5f7d2da4",
+      "7e0b692a9e163e97",
+      "2eaa814a66e657f3",
+      "9c792085899b678f",
+      "ba790383303f2a8f",
+      "427963967313684c",
+      "f9d233494d4d8e81",
+      "3720bc66d46bfe03",
+      "2e0ae15b85f89009",
+      "5a344f1f01798401",
+      "e1ba659a9c98a0ea",
+      "b7d33731209536fd",
+      "5641d135a942ac92",
+      "bd515f865e64f305",
+      "280f660e95a33dac",
+      "c73c110e9bc020ef",
+      "6e8d7215c98322e8",
+      "4b80205c44904ddb",
+      "04c64ef4a7d98098",
+      "c7a98d39a79982e2",
+      "b644567f586e6ae8",
+      "bd3eba2d38d6ae0c",
+      "7875f87ed6e64984",
+      "f564f9e78856bedf",
+      "b901df0e778e0e4e",
+      "4ca6153a425eb82b",
+      "75777786ea38eed0",
+      "642a5d6edf3a0f10",
+      "c3ffb8f70ad4a35e",
+      "5e7efee2b5d8560e",
+      "9a4829e1993d3875",
+      "2c2b2c74b3b9b39d",
+      "5fac2564a9ee9495",
+      "24dfa992bb3a75da",
+      "abe4b1f0417cd98c",
+      "037acd9d4a2f1868",
+      "124baa6ecf6c3a55",
+      "a47501981c5ff868",
+      "bdb94c52c78ec25e",
+      "151c6089f2d2ed86",
+      "c3346c7f45d217ff",
+      "c291c5b6d853044d"
+    ],
     "news:실리카겔": [
       "ad1838c9d91180a4",
       "6d48f385c76efe83",
@@ -288,7 +468,8 @@
   },
   "reminders": {
     "melon:13227|10min|일반 예매|2026-11-12T11:00:00+00:00": {
-      "open_at": "2026-11-12T11:00:00+00:00"
+      "open_at": "2026-11-12T11:00:00+00:00",
+      "push": "scheduled"
     },
     "melon:13227|day|일반 예매|2026-11-12T11:00:00+00:00": {
       "mail": "none",
@@ -299,7 +480,9 @@
   "remote_nonces": [
     "0a580ee95c65840c380235de",
     "0c63047b7499bb15c0b56a10",
-    "33cbcfda829744469c0673a4"
+    "33cbcfda829744469c0673a4",
+    "099d4256340f26311aabf759",
+    "f3706a3e08f80603ec54d1ad"
   ],
   "yes24_seen": [
     18786,

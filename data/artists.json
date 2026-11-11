@@ -1,4 +1,25 @@
 {
-  "artists": [],
+  "artists": [
+    {
+      "name": "빅뱅",
+      "kopis_keywords": [
+        "빅뱅",
+        "Big Bang",
+        "BIGBANG",
+        "빅뱅(Daesung)"
+      ],
+      "ticketmaster_keyword": "Big Bang",
+      "news_queries": [
+        "빅뱅"
+      ],
+      "exclude_keywords": [
+        "트리뷰트",
+        "tribute",
+        "커버",
+        "헌정"
+      ],
+      "added_from_page": "2026-11-11T17:44:03+00:00"
+    }
+  ],
   "removed": []
 }
