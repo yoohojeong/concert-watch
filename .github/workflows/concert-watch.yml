@@ -27,10 +27,6 @@ permissions:
   issues: write
   actions: write       # 다음 실행을 스스로 시작하려고(5분 주기 이어달리기)
 
-concurrency:
-  group: concert-watch
-  cancel-in-progress: false
-
 jobs:
   watch:
     # 이슈는 저장소 주인이 연 예매 계획 이슈만 처리(다른 사람이 연 이슈는 무시)
@@ -39,6 +35,10 @@ jobs:
       (github.event.issue.user.login == github.repository_owner &&
        contains(github.event.issue.body, '<!-- concert-watch-pick -->'))
     runs-on: ubuntu-latest
+    # 실행은 하나씩만. 건너뛴(남이 연 이슈) 실행은 여기 끼지 않아서 대기 중인 실행을 밀어내지 않는다.
+    concurrency:
+      group: concert-watch
+      cancel-in-progress: false
     timeout-minutes: 20
     env:
       KOPIS_API_KEY: ${{ secrets.KOPIS_API_KEY }}
@@ -117,10 +117,11 @@ jobs:
           fi
 
       # GitHub의 정기 실행(schedule)이 새 저장소에서 안 돌거나 밀리는 일이 있어서,
-      # 정기·이어달리기 실행은 끝나기 전에 약 5분 뒤 다음 실행을 직접 시작한다.
+      # 실행이 끝나기 전에 약 5분 뒤 다음 실행을 직접 시작한다.
       # 실행이 겹치면 concurrency 설정 때문에 대기 중인 것 하나만 남아서 이어달리기가 여러 줄로 늘어나지 않는다.
       - name: 5분 뒤 다음 실행 시작
-        if: ${{ always() && (github.event_name == 'schedule' || inputs.chain) }}
+        # 어떤 이유로 시작된 실행이든 다음 실행을 이어 준다(대기 중인 실행은 하나만 남으니 늘어나지 않음)
+        if: ${{ always() && !inputs.test_notify }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
