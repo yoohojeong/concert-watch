@@ -258,6 +258,9 @@ fieldset.field legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
   .day .num { font-size: 2.2rem; } }
 .chip-group { position: relative; display: inline-flex; }
 .chip-group[hidden] { display: none; }
+#pending-chips { display: contents; }
+.chip.pending { display: inline-flex; align-items: center; gap: .35rem; }
+.chip.pending .chip-x { position: static; transform: none; }
 .chip-group .chip { padding-right: 2.1rem; }
 .chip-x { position: absolute; right: .35rem; top: 50%; transform: translateY(-50%); min-width: 1.4rem; height: 1.4rem;
   padding: 0 .3rem; border: 0; border-radius: 999px; background: transparent; color: var(--muted);
@@ -524,7 +527,7 @@ SCRIPT = r"""
     try {
       await sendChange(change);
       dlg.close();
-      say(`저장했어요. 1시간 안에 반영돼요. ${done}`);
+      say(`저장했어요. 몇 분 안에 반영돼요. ${done}`);
     } catch (e) { f.error.textContent = e.message; } finally {
       [f.save, f.close].forEach((b) => { b.disabled = false; });
       f.save.textContent = label;
@@ -601,7 +604,24 @@ SCRIPT = r"""
     const list = readArtistPending();
     pendingWrap.replaceChildren(...list.filter((x) => x.action === 'add').map((x) => {
       const c = document.createElement('span');
-      c.className = 'chip pending'; c.textContent = `${x.name} · 추가 중`;
+      c.className = 'chip pending';
+      const label = document.createElement('span');
+      label.textContent = `${x.name} · 추가 중`;
+      const cancel = document.createElement('button');
+      cancel.type = 'button'; cancel.className = 'chip-x'; cancel.textContent = '×';
+      cancel.setAttribute('aria-label', `${x.name} 추가 취소`);
+      cancel.addEventListener('click', async () => {
+        if (!(await canEdit())) return;
+        cancel.disabled = true;
+        try {
+          await post({ action: 'remove_artist', name: x.name });
+          const rest = readArtistPending().filter((y) => y.name.toLowerCase() !== x.name.toLowerCase());
+          ls.set(ARTIST_PENDING, JSON.stringify(rest));
+          showArtistPending();
+          say(`${x.name} 추가를 취소했어요.`);
+        } catch (e) { say(`취소하지 못했어요. ${e.message}`); cancel.disabled = false; }
+      });
+      c.append(label, cancel);
       return c;
     }));
     const removing = new Set(list.filter((x) => x.action === 'remove').map((x) => x.name.toLowerCase()));
@@ -649,7 +669,7 @@ SCRIPT = r"""
       await post({ action: 'add_artist', name });
       pushArtistPending('add', name);
       nameIn.value = ''; closeAdd();
-      say(`${name}을(를) 추가했어요. 1시간 안에 공연을 찾아 넣고, 예매 오픈 시각이 나온 국내 공연은 자동으로 알려드려요.`);
+      say(`${name}을(를) 추가했어요. 몇 분 안에 공연을 찾아 넣고, 예매 오픈 시각이 나온 국내 공연은 자동으로 알려드려요.`);
     } catch (e) { say(`추가하지 못했어요. ${e.message}`); } finally { btn.disabled = false; }
   });
 
@@ -672,7 +692,7 @@ SCRIPT = r"""
         await post({ action: 'remove_artist', name });
         if (g.querySelector('.chip').getAttribute('aria-pressed') === 'true') apply('');
         pushArtistPending('remove', name);
-        say(`${name}을(를) 뺐어요. 1시간 안에 반영돼요.`);
+        say(`${name}을(를) 뺐어요. 몇 분 안에 반영돼요.`);
       } catch (e) { say(`빼지 못했어요. ${e.message}`); reset(); } finally { x.disabled = false; }
     });
   });
@@ -710,8 +730,10 @@ SCRIPT = r"""
 def render_html(state: dict, cfg: dict, now: dt.datetime, picks: dict | None = None) -> str:
     title = escape((cfg.get("site") or {}).get("title") or "콘서트 알리미")
     artists = [a["name"] for a in cfg.get("artists", [])]
-    shows = upcoming(list(state.get("events", {}).values()), now.date())
-    news = recent_news(state, now)
+    tracked = set(artists)
+    # 뺀 아티스트의 공연·소식은 보여주지 않는다
+    shows = [e for e in upcoming(list(state.get("events", {}).values()), now.date()) if e.get("artist") in tracked]
+    news = [n for n in recent_news(state, now) if n.get("artist") in tracked]
     counts = Counter(e["artist"] for e in shows)
 
     months: dict[tuple[int, int], list[str]] = {}
@@ -773,7 +795,7 @@ def render_html(state: dict, cfg: dict, now: dt.datetime, picks: dict | None = N
       <button type="button" class="pill-btn help-btn" id="add-help-btn" aria-label="어디서 찾나요?" aria-expanded="false" aria-controls="add-help">?</button>
     </form>
   </nav>
-  <p class="add-help" id="add-help" hidden>국내 공연 DB(KOPIS), 멜론티켓·인터파크·예스24 티켓오픈 공지, Ticketmaster, 뉴스에서 공연을 찾아요. 추가·삭제는 1시간 안에 반영돼요.</p>
+  <p class="add-help" id="add-help" hidden>국내 공연 DB(KOPIS), 멜론티켓·인터파크·예스24 티켓오픈 공지, Ticketmaster, 뉴스에서 공연을 찾아요. 추가·삭제는 몇 분 안에 반영돼요.</p>
   {news_html}
   {body}
   <footer>

@@ -2,7 +2,7 @@ name: concert-watch
 
 on:
   schedule:
-    - cron: "17 * * * *"     # 매시간(정각 혼잡을 피해 17분). 공연 API는 config의 api_interval_hours마다
+    - cron: "*/5 * * * *"    # 5분마다: 웹페이지 변경은 바로 반영, 공연 확인은 1시간마다(watch.py --auto)
   push:
     paths: ["data/picks.json"]   # picks.json을 직접 고치면 바로 리마인더를 예약
   issues:
@@ -83,7 +83,7 @@ jobs:
 
       - name: 공연 확인
         if: ${{ github.event_name != 'push' && github.event_name != 'issues' && !inputs.test_notify }}
-        run: python watch.py ${{ inputs.force_api && '--force-api' || '' }}
+        run: python watch.py ${{ github.event_name == 'schedule' && '--auto' || '' }} ${{ inputs.force_api && '--force-api' || '' }}
 
       - name: 결과 저장
         if: ${{ !inputs.test_notify }}

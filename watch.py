@@ -178,6 +178,15 @@ def prune(state: dict, today: dt.date, keep_days: int = 30) -> None:
     }
 
 
+CHECK_INTERVAL = dt.timedelta(minutes=55)
+
+
+def check_due(state: dict, now: dt.datetime) -> bool:
+    """정기 확인(예매처 공지·뉴스·공식 사이트·리마인더)을 할 때가 됐는지. 약 1시간마다."""
+    last = state.get("last_checked")
+    return not last or now - dt.datetime.fromisoformat(last) >= CHECK_INTERVAL
+
+
 def api_due(cfg: dict, state: dict, now: dt.datetime) -> bool:
     last = state.get("last_api_check")
     if not last:
@@ -232,6 +241,8 @@ def main() -> int:
     p.add_argument("--dry-run", action="store_true", help="알림을 보내지 않고 내용만 출력")
     p.add_argument("--test-notify", action="store_true", help="예시 공연으로 알림 채널 점검")
     p.add_argument("--force-api", action="store_true", help="확인 간격과 상관없이 공연 API(KOPIS·Ticketmaster)를 지금 확인")
+    p.add_argument("--auto", action="store_true",
+                   help="5분마다: 웹페이지 변경은 바로 반영하고, 공연 확인은 1시간마다만")
     p.add_argument("--reminders-only", action="store_true", help="공연 확인 없이 예매 리마인더만 처리")
     p.add_argument("--apply-issue", metavar="EVENT_JSON", help="예매 계획 이슈를 반영한 뒤 리마인더 처리")
     args = p.parse_args()
@@ -265,11 +276,19 @@ def main() -> int:
     before = json.dumps(artists_data, sort_keys=True)
     new_artists: list[str] = []
     picks_changed = apply_remote_edits(cfg, state, all_picks, artists_data, new_artists)
-    if json.dumps(artists_data, sort_keys=True) != before:
+    artists_changed = json.dumps(artists_data, sort_keys=True) != before
+    if artists_changed:
         artists_store.save(artists_path, artists_data)
         cfg["artists"] = artists_store.merged({"artists": base_artists}, artists_data)
 
-    if args.reminders_only or args.apply_issue:
+    quick = False
+    if args.auto and not (new_artists or check_due(state, now)):
+        if not (picks_changed or artists_changed):
+            log.info("웹페이지에서 바뀐 게 없고, 공연 확인은 아직 때가 아니에요")
+            return 0
+        quick = True       # 예매 계획·아티스트 변경만 바로 반영
+
+    if args.reminders_only or args.apply_issue or quick:
         if picks_changed:
             picks_store.save(picks_path, all_picks)
         picks = picks_store.active(all_picks)

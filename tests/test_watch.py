@@ -592,3 +592,9 @@ def test_interpark_and_yes24_notice_parsing():
     assert [(c["label"], c["at"][:16]) for c in n["sale_times"]] == [("팬클럽 선예매", "2026-11-19T02:00"),
                                                                      ("일반 예매", "2026-11-20T11:00")]
     assert n["venue"] == "올림픽홀" and n["start"] == "2027-01-16" and n["url"].endswith("/Perf/61052")
+
+
+def test_check_due_every_hour():
+    assert watch.check_due({}, NOW)
+    assert not watch.check_due({"last_checked": (NOW - dt.timedelta(minutes=20)).isoformat()}, NOW)
+    assert watch.check_due({"last_checked": (NOW - dt.timedelta(minutes=56)).isoformat()}, NOW)
