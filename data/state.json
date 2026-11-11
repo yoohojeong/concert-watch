@@ -81,16 +81,24 @@
     }
   },
   "instagram_seen": {},
-  "last_api_check": "2026-11-12T00:37:09+09:00",
-  "last_api_errors": [],
-  "last_checked": "2026-11-12T01:04:46+09:00",
+  "last_api_check": "2026-11-12T01:08:20+09:00",
+  "last_api_errors": [
+    "KOPIS(HTTPError)"
+  ],
+  "last_checked": "2026-11-12T01:08:20+09:00",
   "last_errors": [
-    "공식 사이트 https://www.coldplay.com/tour/(HTTPError)",
-    "공식 사이트 https://hyukoh.com/(SSLError)",
-    "공식 사이트 https://msbsound.com/artist/silica-gel(SourceError)",
-    "공식 사이트 https://www.greenday.com/(SourceError)"
+    "KOPIS(HTTPError)",
+    "공식 사이트 https://msbsound.com/(SourceError)"
   ],
   "page_seen": {
+    "http://www.hyukoh.com/": [
+      "97bc3b1d068d8ed4",
+      "c02bb95b4a60e1fb",
+      "d85f27f91eaac957",
+      "dc2cb0ca1e8309f3",
+      "098bcd376f2fc235",
+      "538b3d9298796a8e"
+    ],
     "https://oasisinet.com/": [
       "34c808d0a63f277e",
       "55de88709232ec03",
