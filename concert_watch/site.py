@@ -434,7 +434,7 @@ SCRIPT = r"""
     });
     f.autoList.hidden = !found.length;
     f.autoHelp.textContent = found.length
-      ? '찾은 시간마다 하루 전과 10분 전에 알려드려요. 새 예매 일정이 발표되면 자동으로 더해요.'
+      ? '예매 오픈 하루 전과 10분 전에 알려드려요.'
       : '아직 발표된 예매 오픈 일시가 없어요. 공식 인스타그램이나 사이트에 발표되면 자동으로 넣고 알려드릴게요.';
 
     const manual = p ? isManual(p) : false;
