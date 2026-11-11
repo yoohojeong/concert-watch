@@ -225,7 +225,7 @@ def test_reminders_schedule_exact_times_only_inside_window(monkeypatch):
     picks, state = {"k": _pick(open_at)}, {}
 
     reminders.process(RCFG, picks, state, NOW)
-    assert pushes == [] and mails == []                       # 아직 3시간 창 밖
+    assert pushes == [] and mails == []                       # 아직 예약 창(24시간) 밖
 
     t1 = open_at - dt.timedelta(days=1, hours=2)               # 하루 전 알림 2시간 전
     reminders.process(RCFG, picks, state, t1)
@@ -236,11 +236,8 @@ def test_reminders_schedule_exact_times_only_inside_window(monkeypatch):
 
     t2 = open_at - dt.timedelta(days=1) + dt.timedelta(minutes=20)   # 크론이 20분 늦게 돌아도
     reminders.process(RCFG, picks, state, t2)
-    assert len(pushes) == 1 and len(mails) == 1               # 푸시는 중복 없이, 이메일만 발송
-
-    t3 = open_at - dt.timedelta(hours=2, minutes=30)
-    reminders.process(RCFG, picks, state, t3)
-    assert len(pushes) == 2
+    assert len(mails) == 1                                    # 이메일은 시각이 되면 발송
+    assert len(pushes) == 2                                   # 하루 전 푸시는 중복 없이, 10분 전 푸시는 24시간 창에 들어와 미리 예약
     title, at, prio = pushes[1]
     assert at == open_at - dt.timedelta(minutes=10) and "10분 뒤" in title and prio == 5
 

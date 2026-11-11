@@ -15,7 +15,7 @@ from . import notify, opentimes
 log = logging.getLogger(__name__)
 
 KINDS = (("day", dt.timedelta(days=1)), ("10min", dt.timedelta(minutes=10)))
-PUSH_WINDOW = dt.timedelta(hours=3)    # 예약은 이 시간 안쪽만(너무 일찍 맡기면 취소할 수 없어서)
+PUSH_WINDOW = dt.timedelta(hours=24)   # 예약은 이 시간 안쪽만(너무 일찍 맡기면 취소할 수 없어서). GitHub 정기 실행이 밀려도 놓치지 않게 넉넉히
 SEND_NOW_WITHIN = dt.timedelta(seconds=60)
 WEEKDAYS = "월화수목금토일"
 

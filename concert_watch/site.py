@@ -589,7 +589,7 @@ SCRIPT = r"""
       ls.set(PENDING_STORE, JSON.stringify(pend));
       picks = activeOnly(withPending(picks));
       render();
-      say('예매 계획을 취소했어요. 3시간 안에 예정된 알림은 이미 예약돼 있어서 한 번 더 올 수 있어요.');
+      say('예매 계획을 취소했어요. 하루 안에 예정된 알림은 이미 예약돼 있어서 한 번 더 올 수 있어요.');
     } catch (e) { say(`취소하지 못했어요. ${e.message}`); } finally { b.disabled = false; resetUnpick(b); }
   });
   f.close.addEventListener('click', () => dlg.close());
