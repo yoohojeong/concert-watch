@@ -60,6 +60,7 @@ def recent_news(state: dict, now: dt.datetime) -> list[dict]:
 
 def _pick_controls(key: str) -> str:
     return (f'<div class="pick-row"><button type="button" class="pick" data-key="{escape(key)}">예매할게요</button>'
+            f'<button type="button" class="unpick" data-key="{escape(key)}" hidden>예매 안 할래요</button>'
             f'<p class="pick-state" data-key="{escape(key)}" hidden></p></div>')
 
 
@@ -212,6 +213,11 @@ ol { list-style: none; margin: 0; padding: 0; }
 .pick { font: 600 .9rem/1 var(--text); padding: .6rem 1rem; border-radius: 6px; cursor: pointer;
   color: var(--accent); background: transparent; border: 1.5px solid var(--accent); }
 .pick[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.unpick { font: 600 .9rem/1 var(--text); padding: .6rem 1rem; border-radius: 6px; cursor: pointer;
+  color: var(--muted); background: transparent; border: 1.5px solid var(--line); }
+.unpick[hidden] { display: none; }
+.unpick.confirm { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
+.unpick:disabled { opacity: .6; cursor: progress; }
 .pick-state { margin: 0; font-size: .9rem; color: var(--ink); }
 .plan h2 { border-bottom-color: var(--accent); }
 .plan .left { margin: .2rem 0 0; font-weight: 600; color: var(--accent); }
@@ -369,8 +375,9 @@ SCRIPT = r"""
     document.querySelectorAll('.pick[data-key]').forEach((btn) => {
       const p = picks[btn.dataset.key];
       btn.setAttribute('aria-pressed', String(!!p));
-      btn.textContent = p ? '예매 계획 수정' : '예매할게요';
+      btn.textContent = p ? '예매 수정' : '예매할게요';
     });
+    document.querySelectorAll('.unpick[data-key]').forEach((btn) => { btn.hidden = !picks[btn.dataset.key]; });
     document.querySelectorAll('.pick-state').forEach((el) => {
       const p = picks[el.dataset.key];
       el.hidden = !p;
@@ -394,7 +401,7 @@ SCRIPT = r"""
       li.className = 'show';
       li.innerHTML = `<div class="day" aria-hidden="true"><span class="num"></span><span class="wd"></span></div>
         <div class="body"><p class="artist"></p><h3></h3><div class="times"></div><p class="left"></p>
-        <div class="links"></div><div class="pick-row"><button type="button" class="pick" aria-pressed="true">예매 계획 수정</button></div></div>`;
+        <div class="links"></div><div class="pick-row"><button type="button" class="pick" aria-pressed="true">예매 수정</button><button type="button" class="unpick">예매 안 할래요</button></div></div>`;
       const first = next[0] || all[all.length - 1];
       li.querySelector('.num').textContent = first ? first.d.getDate() : '–';
       li.querySelector('.wd').textContent = first ? `${first.d.getMonth() + 1}월` : '발표 전';
@@ -415,6 +422,7 @@ SCRIPT = r"""
         li.querySelector('.links').append(a);
       }
       li.querySelector('.pick').addEventListener('click', () => openDialog(key));
+      li.querySelector('.unpick').dataset.key = key;
       ol.append(li);
     });
   };
@@ -426,7 +434,7 @@ SCRIPT = r"""
     modes: dlg.querySelectorAll('input[name="mode"]'), autoBox: dlg.querySelector('#auto-box'),
     manualBox: dlg.querySelector('#manual-box'), autoList: dlg.querySelector('#auto-list'), autoHelp: dlg.querySelector('#auto-help'),
     link: dlg.querySelector('#link'), pass: dlg.querySelector('#pass'), passField: dlg.querySelector('#pass-field'), error: dlg.querySelector('.error'), save: dlg.querySelector('#save'),
-    remove: dlg.querySelector('#remove'), close: dlg.querySelector('#close'),
+    close: dlg.querySelector('#close'),
   };
   let currentKey = null;
   const mode = () => (dlg.querySelector('input[name="mode"]:checked') || {}).value || 'auto';
@@ -470,7 +478,6 @@ SCRIPT = r"""
     showMode();
 
     f.link.value = (p && p.link) || item.link || '';
-    f.remove.hidden = !p;
     f.passField.hidden = !DATA.edit.passphrase || !!ls.get(KEY_STORE);
     f.pass.value = '';
     f.save.textContent = p ? '변경 저장' : '저장';
@@ -512,14 +519,14 @@ SCRIPT = r"""
   const submit = async (change, done) => {
     if (!ready()) return;
     const label = f.save.textContent;
-    [f.save, f.remove, f.close].forEach((b) => { b.disabled = true; });
+    [f.save, f.close].forEach((b) => { b.disabled = true; });
     f.save.textContent = '저장하는 중…';
     try {
       await sendChange(change);
       dlg.close();
       say(`저장했어요. 1시간 안에 반영돼요. ${done}`);
     } catch (e) { f.error.textContent = e.message; } finally {
-      [f.save, f.remove, f.close].forEach((b) => { b.disabled = false; });
+      [f.save, f.close].forEach((b) => { b.disabled = false; });
       f.save.textContent = label;
     }
   };
@@ -545,9 +552,31 @@ SCRIPT = r"""
     submit({ action: 'set', key, pick: record }, describe(key, record));
   });
 
-  f.remove.addEventListener('click', () => {
-    if (!ready()) return;
-    submit({ action: 'delete', key: currentKey }, '취소해도 3시간 안에 예정된 알림은 이미 예약돼 있어서 한 번 더 올 수 있어요.');
+  // '예매 안 할래요': 한 번 누르면 확인으로 바뀌고, 3초 안에 한 번 더 누르면 취소
+  const unpickTimers = new WeakMap();
+  const resetUnpick = (b) => { b.classList.remove('confirm'); b.textContent = '예매 안 할래요'; };
+  document.addEventListener('click', async (ev) => {
+    const b = ev.target.closest('.unpick');
+    if (!b || !b.dataset.key) return;
+    if (!b.classList.contains('confirm')) {
+      b.classList.add('confirm'); b.textContent = '정말 안 할래요?';
+      clearTimeout(unpickTimers.get(b));
+      unpickTimers.set(b, setTimeout(() => resetUnpick(b), 3000));
+      return;
+    }
+    clearTimeout(unpickTimers.get(b));
+    if (!(await canEdit())) { resetUnpick(b); return; }
+    b.disabled = true;
+    try {
+      const change = { action: 'delete', key: b.dataset.key };
+      await post(change);
+      const pend = readPending();
+      pend[change.key] = { change, at: Date.now() };
+      ls.set(PENDING_STORE, JSON.stringify(pend));
+      picks = activeOnly(withPending(picks));
+      render();
+      say('예매 계획을 취소했어요. 3시간 안에 예정된 알림은 이미 예약돼 있어서 한 번 더 올 수 있어요.');
+    } catch (e) { say(`취소하지 못했어요. ${e.message}`); } finally { b.disabled = false; resetUnpick(b); }
   });
   f.close.addEventListener('click', () => dlg.close());
 
@@ -782,7 +811,6 @@ def render_html(state: dict, cfg: dict, now: dt.datetime, picks: dict | None = N
   <p class="error" role="alert"></p>
   <div class="actions">
     <button type="button" class="primary" id="save">저장</button>
-    <button type="button" class="danger" id="remove" hidden>예매 안 할래요</button>
     <button type="button" id="close">닫기</button>
   </div>
 </dialog>
