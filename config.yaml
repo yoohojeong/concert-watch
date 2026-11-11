@@ -1,0 +1,72 @@
+# 콘서트 알리미 설정
+# 비밀번호, 토큰, 전화번호, 이메일 주소는 여기 적지 말고 GitHub Secrets에 넣으세요(README 참고).
+
+timezone: Asia/Seoul
+lookahead_days: 180          # 오늘부터 며칠 뒤 공연까지 볼지
+api_interval_hours: 3        # KOPIS·Ticketmaster 확인 간격. 공식 인스타그램·사이트는 매시간 확인해요.
+
+artists:
+  # name: 페이지와 알림에 표시할 이름
+  # kopis_keywords: 국내 공연 제목에서 찾을 단어(KOPIS)
+  # ticketmaster_keyword: 해외 공연용. Ticketmaster의 아티스트 이름과 같아야 해요.
+  # exclude_keywords: 제목에 이 단어가 있으면 제외(트리뷰트, 커버 공연 등)
+  # instagram: 공식 인스타그램 계정 이름(@ 없이)
+  # official_pages: 새 내용이 올라오는지 지켜볼 공식 웹페이지
+
+  - name: Coldplay
+    kopis_keywords: ["콜드플레이", "Coldplay"]
+    ticketmaster_keyword: Coldplay
+    exclude_keywords: ["트리뷰트", "tribute", "커버", "헌정"]
+    instagram: coldplay
+    official_pages: ["https://www.coldplay.com/tour/"]
+
+  - name: Oasis
+    kopis_keywords: ["Oasis", "오아시스"]
+    ticketmaster_keyword: Oasis
+    exclude_keywords: ["트리뷰트", "tribute", "커버", "헌정"]
+    instagram: oasis
+    official_pages: ["https://oasisinet.com/"]
+
+  - name: 혁오
+    kopis_keywords: ["혁오", "HYUKOH"]
+    ticketmaster_keyword: HYUKOH
+    exclude_keywords: ["트리뷰트", "커버", "헌정"]
+    instagram: hyukohofficial
+    official_pages: ["https://hyukoh.com/"]
+
+  - name: 실리카겔
+    kopis_keywords: ["실리카겔", "Silica Gel"]
+    ticketmaster_keyword: Silica Gel
+    exclude_keywords: ["트리뷰트", "커버", "헌정"]
+    instagram: silicagel.official
+    official_pages: ["https://msbsound.com/artist/silica-gel"]
+
+  - name: Green Day
+    kopis_keywords: ["그린데이", "Green Day"]
+    ticketmaster_keyword: Green Day
+    exclude_keywords: ["트리뷰트", "tribute", "커버", "헌정"]
+    instagram: greenday
+    official_pages: ["https://www.greenday.com/"]
+
+ticketmaster:
+  countries: []              # 비우면 전 세계. 특정 나라만 보려면 예: ["US", "GB", "JP"]
+
+official:
+  # 인스타그램 글이나 공식 사이트의 새 줄에 이 단어가 있으면 알려요(사이트는 날짜가 있어도 알려요).
+  keywords: ["tour", "concert", "tickets", "ticket", "on sale", "presale", "pre-sale", "dates", "festival",
+             "공연", "콘서트", "투어", "내한", "티켓", "예매", "단독", "페스티벌", "선예매"]
+
+open_time:
+  # 공식 소식에서 예매 오픈 일시를 찾을 때 쓰는 Claude 모델(ANTHROPIC_API_KEY Secret이 있을 때)
+  model: claude-haiku-5-5
+
+notify:
+  email: true
+  sms: false
+  sms_provider: solapi       # solapi(한국 번호) 또는 twilio(해외 번호)
+  push: true                 # ntfy 앱 푸시
+  on_first_run: false        # true면 아티스트를 처음 추가할 때 이미 잡혀 있는 공연도 알림
+
+site:
+  title: 콘서트 알리미
+  url: ""                    # 예: https://내아이디.github.io/concert-watch/  (알림에 링크로 들어가요)

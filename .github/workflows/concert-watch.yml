@@ -1,0 +1,78 @@
+name: concert-watch
+
+on:
+  schedule:
+    - cron: "17 * * * *"     # 매시간(정각 혼잡을 피해 17분). 공연 API는 config의 api_interval_hours마다
+  push:
+    paths: ["data/picks.json"]   # 웹페이지에서 예매 계획을 저장하면 바로 리마인더를 예약
+  workflow_dispatch:
+    inputs:
+      test_notify:
+        description: "예시 공연으로 알림만 점검하기"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: concert-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      KOPIS_API_KEY: ${{ secrets.KOPIS_API_KEY }}
+      TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
+      SMTP_HOST: ${{ secrets.SMTP_HOST }}
+      SMTP_PORT: ${{ secrets.SMTP_PORT }}
+      SMTP_USER: ${{ secrets.SMTP_USER }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+      NOTIFY_EMAIL_TO: ${{ secrets.NOTIFY_EMAIL_TO }}
+      SMS_FROM: ${{ secrets.SMS_FROM }}
+      NOTIFY_SMS_TO: ${{ secrets.NOTIFY_SMS_TO }}
+      SOLAPI_API_KEY: ${{ secrets.SOLAPI_API_KEY }}
+      SOLAPI_API_SECRET: ${{ secrets.SOLAPI_API_SECRET }}
+      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+      NTFY_SERVER: ${{ secrets.NTFY_SERVER }}
+      NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+      IG_USER_ID: ${{ secrets.IG_USER_ID }}
+      IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+      IG_GRAPH_VERSION: ${{ secrets.IG_GRAPH_VERSION }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      - name: 알림 점검
+        if: ${{ inputs.test_notify }}
+        run: python watch.py --test-notify
+
+      - name: 예매 리마인더만 처리
+        if: ${{ github.event_name == 'push' }}
+        run: python watch.py --reminders-only
+
+      - name: 공연 확인
+        if: ${{ github.event_name != 'push' && !inputs.test_notify }}
+        run: python watch.py
+
+      - name: 결과 저장
+        if: ${{ !inputs.test_notify }}
+        run: |
+          git config user.name "concert-watch-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/state.json docs
+          git diff --cached --quiet && exit 0
+          git commit -m "공연 일정 갱신"
+          # 그 사이 웹페이지에서 예매 계획이 저장됐을 수 있으니 합친 뒤 올린다
+          for i in 1 2 3; do git pull --rebase && git push && exit 0; sleep 5; done
+          exit 1
