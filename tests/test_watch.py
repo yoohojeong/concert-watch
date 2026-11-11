@@ -533,3 +533,14 @@ def test_remote_edit_without_passphrase_accepts_unsigned():
     picks, state = {"melon:1": {"artist": "혁오", "mode": "auto"}}, {}
     done = remote.apply_remote(picks, state, None, "me/repo", "", "", messages=[{"message": json.dumps({"m": m})}])
     assert len(done) == 1 and picks["melon:1"]["mode"] == "off"
+
+
+def test_found_time_source_matches_event_source():
+    at = (NOW + dt.timedelta(days=1)).isoformat()
+    state = {"events": {"melon:1": {"source": "melon", "artist": "혁오", "url": "https://ticket.melon.com/x",
+                                    "sale_times": [{"label": "일반 예매", "at": at}]},
+                        "tm:1": {"source": "ticketmaster", "artist": "혁오", "url": "https://tm/x",
+                                 "sale_times": [{"label": "일반 예매", "at": at}]}}}
+    from concert_watch import opentimes
+    assert opentimes.candidates_for("melon:1", {}, state)[0]["source"] == "멜론티켓"
+    assert opentimes.candidates_for("tm:1", {}, state)[0]["source"] == "Ticketmaster"

@@ -23,6 +23,7 @@ log = logging.getLogger(__name__)
 API_URL = "https://api.openai.com/v1/chat/completions"
 DEFAULT_MODEL = "gpt-4o-mini"
 SOURCE_NAMES = {"instagram": "공식 인스타그램", "web": "공식 사이트", "news": "뉴스"}
+EVENT_SOURCE_NAMES = {"ticketmaster": "Ticketmaster", "melon": "멜론티켓", "kopis": "KOPIS"}
 
 SYSTEM_PROMPT = """You read concert announcements and extract when ticket sales open.
 Return ONLY a JSON object, no prose, no code fences:
@@ -158,7 +159,7 @@ def candidates_for(key: str, info: dict, state: dict) -> list[dict]:
     out: list[dict] = []
 
     if ev:
-        out += [{**c, "source": "Ticketmaster", "source_url": ev.get("url", ""),
+        out += [{**c, "source": EVENT_SOURCE_NAMES.get(ev.get("source"), "예매처"), "source_url": ev.get("url", ""),
                  "found_at": ev.get("first_seen", "")} for c in ev.get("sale_times") or []]
 
     own = news.get(key)
