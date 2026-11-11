@@ -18,7 +18,7 @@ from .notify import anchor_id
 WEEKDAYS = "월화수목금토일"
 NEW_DAYS = 7     # 처음 발견된 지 며칠까지 '새로 떴어요' 표시
 NEWS_DAYS = 30   # 최근 공식 소식을 며칠치 보여줄지
-SOURCE_NAMES = {"instagram": "공식 인스타그램", "web": "공식 사이트"}
+SOURCE_NAMES = {"instagram": "공식 인스타그램", "web": "공식 사이트", "news": "뉴스"}
 
 
 def _safe_url(url: str) -> str:

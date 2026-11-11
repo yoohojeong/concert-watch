@@ -471,3 +471,22 @@ def test_issue_from_other_user_or_bad_body_is_rejected(tmp_path):
             continue
         raise AssertionError(f"반영되면 안 돼요: {author} {body[:20]}")
     assert not picks_path.exists()
+
+
+def test_news_search_baseline_then_only_fresh_announcements(monkeypatch):
+    cfg = {"artists": [{"name": "실리카겔", "kopis_keywords": ["Silica Gel"], "news_queries": ["실리카겔"]}]}
+    old = NOW - dt.timedelta(days=30)
+    feed = [{"id": "a", "title": "실리카겔, 첫 아시아 투어 개최", "link": "https://n/a", "published": old}]
+    monkeypatch.setattr(official, "fetch_news", lambda q: list(feed))
+    state = {}
+    assert official.check(cfg, state, NOW)[0] == []                  # 첫 확인은 기준만 저장
+    feed += [
+        {"id": "b", "title": "실리카겔 단독 콘서트 티켓 오픈 11월 20일 오후 8시", "link": "https://n/b", "published": NOW},
+        {"id": "c", "title": "실리카겔, KSPO DOME 공연 성료", "link": "https://n/c", "published": NOW},
+        {"id": "d", "title": "실리카겔 정규 3집 발매", "link": "https://n/d", "published": NOW},
+        {"id": "e", "title": "실리카겔 내한 투어 예매", "link": "https://n/e", "published": old},
+    ]
+    news, errors = official.check(cfg, state, NOW)
+    assert errors == [] and len(news) == 1
+    assert news[0]["source"] == "news" and news[0]["url"] == "https://n/b" and "티켓 오픈" in news[0]["text"]
+    assert official.check(cfg, state, NOW)[0] == []                  # 같은 기사는 다시 안 알림

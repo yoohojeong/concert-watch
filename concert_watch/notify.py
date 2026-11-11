@@ -89,7 +89,7 @@ def headline(items: list[dict]) -> str:
 
 
 def _source_name(e: dict) -> str:
-    return {"instagram": "공식 인스타그램", "web": "공식 사이트"}.get(e.get("source"), "공식 채널")
+    return {"instagram": "공식 인스타그램", "web": "공식 사이트", "news": "뉴스"}.get(e.get("source"), "공식 채널")
 
 
 def open_time_lines(e: dict) -> list[str]:

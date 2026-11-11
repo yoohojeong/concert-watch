@@ -22,7 +22,7 @@ import requests
 log = logging.getLogger(__name__)
 API_URL = "https://api.openai.com/v1/chat/completions"
 DEFAULT_MODEL = "gpt-4o-mini"
-SOURCE_NAMES = {"instagram": "공식 인스타그램", "web": "공식 사이트"}
+SOURCE_NAMES = {"instagram": "공식 인스타그램", "web": "공식 사이트", "news": "뉴스"}
 
 SYSTEM_PROMPT = """You read concert announcements and extract when ticket sales open.
 Return ONLY a JSON object, no prose, no code fences:

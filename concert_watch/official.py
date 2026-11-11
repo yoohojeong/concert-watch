@@ -13,7 +13,10 @@ import hashlib
 import logging
 import os
 import re
+import xml.etree.ElementTree as ET
+from email.utils import parsedate_to_datetime
 from html.parser import HTMLParser
+from urllib.parse import quote_plus
 
 import requests
 
@@ -102,6 +105,38 @@ def fetch_page_lines(url: str) -> list[str]:
     if len(lines) < 5:
         raise SourceError("페이지에서 읽을 글자가 거의 없어요(자바스크립트로 그리는 페이지일 수 있어요)")
     return lines
+
+
+# ── 뉴스 검색(Google News RSS) ─────────────────────────
+# 공식 사이트가 없거나 읽을 수 없는 아티스트용. 공연 발표 기사만 골라서 알린다.
+NEWS_URL = "https://news.google.com/rss/search?q={q}&hl=ko&gl=KR&ceid=KR:ko"
+NEWS_MAX_AGE_DAYS = 3        # 이보다 오래된 기사는 새로 보여도 무시
+NEWS_ANNOUNCE_RE = re.compile(
+    r"예매|티켓|오픈|개최|단독\s*(공연|콘서트)|투어|내한|라인업|출연|"
+    r"tour|tickets?|on\s*sale|presale|announce", re.IGNORECASE)
+NEWS_SKIP_RE = re.compile(r"성료|마쳐|마친|마무리|후기|리뷰|현장|열광|매진\s*행렬", re.IGNORECASE)
+
+
+def fetch_news(query: str) -> list[dict]:
+    r = requests.get(NEWS_URL.format(q=quote_plus(query)), headers=BROWSER_HEADERS, timeout=TIMEOUT)
+    r.raise_for_status()
+    items = []
+    for it in ET.fromstring(r.content).iter("item"):
+        title, link = (it.findtext("title") or "").strip(), (it.findtext("link") or "").strip()
+        try:
+            published = parsedate_to_datetime(it.findtext("pubDate") or "")
+        except (TypeError, ValueError):
+            published = None
+        if title and link:
+            items.append({"id": _h(link), "title": title, "link": link, "published": published})
+    return items
+
+
+def is_announcement(title: str, artist_words: list[str]) -> bool:
+    """아티스트 이름이 들어 있고, 공연 발표 같고, 지난 공연 후기는 아닌 기사 제목."""
+    low = title.lower()
+    return (any(w.lower() in low for w in artist_words) and bool(NEWS_ANNOUNCE_RE.search(title))
+            and not NEWS_SKIP_RE.search(title))
 
 
 # ── 인스타그램 ─────────────────────────────────────────
@@ -196,5 +231,35 @@ def check(cfg: dict, state: dict, now: dt.datetime) -> tuple[list[dict], list[st
                     "artist": name, "title": "공식 사이트에 새 내용이 올라왔어요",
                     "summary": _clip(" / ".join(added[:5]), 220), "text": "\n".join(added)[:4000], "url": url,
                     "published": now_iso, "first_seen": now_iso,
+                })
+        for query in artist.get("news_queries") or []:
+            try:
+                items = fetch_news(query)
+            except Exception as e:
+                errors.append(f"뉴스 검색 '{query}'({e.__class__.__name__})")
+                log.error("뉴스 검색 '%s' 확인 실패: %s", query, e)
+                continue
+            skey = f"news:{query}"
+            seen = page_state.get(skey)
+            ids = [i["id"] for i in items]
+            if seen is None:
+                page_state[skey] = ids[:SEEN_LIMIT]
+                log.info("뉴스 검색 '%s' 기사 %d개를 기준으로 저장했어요", query, len(ids))
+                continue
+            seen_set = set(seen)
+            words = [query] + [w for w in (artist.get("kopis_keywords") or []) if w]
+            cutoff = now - dt.timedelta(days=NEWS_MAX_AGE_DAYS)
+            fresh = [i for i in items if i["id"] not in seen_set and is_announcement(i["title"], words)
+                     and (i["published"] is None or i["published"] >= cutoff)]
+            page_state[skey] = (ids + [h for h in seen if h not in set(ids)])[:SEEN_LIMIT]
+            if fresh:
+                fresh.sort(key=lambda i: i["published"] or now, reverse=True)
+                top = fresh[0]
+                news.append({
+                    "key": f"news:{_h('|'.join(i['id'] for i in fresh))}", "kind": "announcement", "source": "news",
+                    "artist": name, "title": _clip(top["title"], 80),
+                    "summary": _clip(" / ".join(i["title"] for i in fresh[:5]), 220),
+                    "text": "\n".join(i["title"] for i in fresh)[:4000], "url": top["link"],
+                    "published": (top["published"] or now).isoformat(), "first_seen": now_iso,
                 })
     return news, errors
