@@ -17,10 +17,15 @@ on:
         description: "공연 API(KOPIS·Ticketmaster)를 지금 바로 확인하기"
         type: boolean
         default: false
+      chain:
+        description: "5분 주기 이어달리기(보통은 자동으로 켜져요)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
   issues: write
+  actions: write       # 다음 실행을 스스로 시작하려고(5분 주기 이어달리기)
 
 concurrency:
   group: concert-watch
@@ -83,7 +88,7 @@ jobs:
 
       - name: 공연 확인
         if: ${{ github.event_name != 'push' && github.event_name != 'issues' && !inputs.test_notify }}
-        run: python watch.py ${{ github.event_name == 'schedule' && '--auto' || '' }} ${{ inputs.force_api && '--force-api' || '' }}
+        run: python watch.py ${{ (github.event_name == 'schedule' || inputs.chain) && '--auto' || '' }} ${{ inputs.force_api && '--force-api' || '' }}
 
       - name: 결과 저장
         if: ${{ !inputs.test_notify }}
@@ -110,3 +115,14 @@ jobs:
           else
             gh issue comment "${{ github.event.issue.number }}" -R "$GITHUB_REPOSITORY" --body "⚠️ ${RESULT:-저장하지 못했어요.} Actions 로그를 확인하세요."
           fi
+
+      # GitHub의 정기 실행(schedule)이 새 저장소에서 안 돌거나 밀리는 일이 있어서,
+      # 정기·이어달리기 실행은 끝나기 전에 약 5분 뒤 다음 실행을 직접 시작한다.
+      # 실행이 겹치면 concurrency 설정 때문에 대기 중인 것 하나만 남아서 이어달리기가 여러 줄로 늘어나지 않는다.
+      - name: 5분 뒤 다음 실행 시작
+        if: ${{ always() && (github.event_name == 'schedule' || inputs.chain) }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sleep 240
+          gh workflow run concert-watch.yml -R "$GITHUB_REPOSITORY" -f chain=true
