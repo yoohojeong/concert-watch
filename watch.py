@@ -201,6 +201,7 @@ def main() -> int:
     p.add_argument("--config", default=str(ROOT / "config.yaml"))
     p.add_argument("--dry-run", action="store_true", help="알림을 보내지 않고 내용만 출력")
     p.add_argument("--test-notify", action="store_true", help="예시 공연으로 알림 채널 점검")
+    p.add_argument("--force-api", action="store_true", help="확인 간격과 상관없이 공연 API(KOPIS·Ticketmaster)를 지금 확인")
     p.add_argument("--reminders-only", action="store_true", help="공연 확인 없이 예매 리마인더만 처리")
     p.add_argument("--apply-issue", metavar="EVENT_JSON", help="예매 계획 이슈를 반영한 뒤 리마인더 처리")
     args = p.parse_args()
@@ -235,7 +236,7 @@ def main() -> int:
         return 0
 
     events, errors = None, []
-    if api_due(cfg, state, now):
+    if args.force_api or api_due(cfg, state, now):
         events, errors = collect(cfg, now.date())
     else:
         log.info("공연 API는 %s시간마다 확인해요. 이번에는 공식 채널만 확인할게요",

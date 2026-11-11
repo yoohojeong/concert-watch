@@ -13,6 +13,10 @@ on:
         description: "예시 공연으로 알림만 점검하기"
         type: boolean
         default: false
+      force_api:
+        description: "공연 API(KOPIS·Ticketmaster)를 지금 바로 확인하기"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -76,7 +80,7 @@ jobs:
 
       - name: 공연 확인
         if: ${{ github.event_name != 'push' && github.event_name != 'issues' && !inputs.test_notify }}
-        run: python watch.py
+        run: python watch.py ${{ inputs.force_api && '--force-api' || '' }}
 
       - name: 결과 저장
         if: ${{ !inputs.test_notify }}
