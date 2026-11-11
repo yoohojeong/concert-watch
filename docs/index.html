@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>콘서트 알리미</title>
+<title>쩡쓰야 콘서트 가자</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎫</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -98,32 +98,57 @@ fieldset.field legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
 .actions button:disabled { opacity: .6; cursor: progress; }
 @media (max-width: 30rem) { .show { grid-template-columns: 3.25rem 1fr; gap: .75rem; }
   .day .num { font-size: 2.2rem; } }
-.add-artist { margin: 1rem 0 1.5rem; }
-.add-artist label { display: block; font-weight: 600; margin-bottom: .35rem; }
-.add-artist .add-row { display: flex; gap: .5rem; }
-.add-artist input { flex: 1; min-width: 0; }
+.chip-group { position: relative; display: inline-flex; }
+.chip-group[hidden] { display: none; }
+.chip-group .chip { padding-right: 2.1rem; }
+.chip-x { position: absolute; right: .35rem; top: 50%; transform: translateY(-50%); min-width: 1.4rem; height: 1.4rem;
+  padding: 0 .3rem; border: 0; border-radius: 999px; background: transparent; color: var(--muted);
+  font: 600 .95rem/1 var(--text); cursor: pointer; }
+.chip-x:hover { background: var(--accent-soft); color: var(--accent); }
+.chip[aria-pressed="true"] + .chip-x { color: var(--bg); }
+.chip[aria-pressed="true"] + .chip-x:hover { background: rgba(255, 255, 255, .18); color: var(--bg); }
+.chip-x.confirm, .chip[aria-pressed="true"] + .chip-x.confirm { background: var(--accent); color: var(--accent-ink);
+  font-size: .78rem; padding: 0 .55rem; }
+.chip-group.confirming .chip { padding-right: 3.6rem; }
+.chip.pending { border-style: dashed; color: var(--muted); cursor: default; }
+.chip-new { border-style: dashed; color: var(--accent); border-color: var(--accent); }
+.add-pill { display: inline-flex; align-items: center; gap: .25rem; padding: .2rem .25rem .2rem .9rem;
+  border: 1.5px solid var(--accent); border-radius: 999px; background: var(--surface); }
+.add-pill[hidden] { display: none; }
+.add-pill input { width: 9rem; min-width: 0; border: 0; background: transparent; color: var(--ink);
+  font: 600 .9rem/1 var(--text); padding: .35rem 0; }
+.add-pill input:focus-visible { outline: none; }
+.add-pill:focus-within { box-shadow: 0 0 0 3px var(--accent-soft); }
+.pill-btn { height: 1.9rem; min-width: 1.9rem; border-radius: 999px; border: 0; cursor: pointer;
+  font: 600 .85rem/1 var(--text); padding: 0 .7rem; }
+.pill-btn.go { background: var(--accent); color: var(--accent-ink); }
+.pill-btn.go:disabled { opacity: .6; cursor: progress; }
+.pill-btn.help-btn { padding: 0; background: transparent; color: var(--muted); border: 1.5px solid var(--line); }
+.pill-btn.help-btn[aria-expanded="true"] { color: var(--accent); border-color: var(--accent); }
+.add-help { margin: .25rem 0 0; padding: .75rem 1rem; border-radius: 8px; background: var(--surface);
+  color: var(--muted); font-size: .88rem; }
+.add-help[hidden] { display: none; }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 </style>
 </head>
 <body>
 <main class="wrap">
   <header>
-    <h1>콘서트 알리미</h1>
-    <p>마지막 확인 11월 12일 02:23</p>
+    <h1>쩡쓰야 콘서트 가자</h1>
+    <p>마지막 확인 11월 12일 02:27</p>
     <p class="warn">최근 확인에서 일부 소스를 불러오지 못했어요: 멜론티켓(HTTPError)</p>
     <p class="status" id="status" role="status" aria-live="polite"></p>
   </header>
   <section class="month plan" id="plan" hidden><h2>내 예매 계획</h2><ol></ol></section>
-  <nav class="filters" aria-label="아티스트별로 보기"><button type="button" class="chip" aria-pressed="true" data-filter="">전체 3</button><button type="button" class="chip" aria-pressed="false" data-filter="Coldplay">Coldplay 0</button><button type="button" class="chip" aria-pressed="false" data-filter="Oasis">Oasis 0</button><button type="button" class="chip" aria-pressed="false" data-filter="혁오">혁오 3</button><button type="button" class="chip" aria-pressed="false" data-filter="실리카겔">실리카겔 0</button><button type="button" class="chip" aria-pressed="false" data-filter="Green Day">Green Day 0</button></nav>
-  <form class="add-artist" id="add-artist" autocomplete="off">
-    <label for="artist-name">가수 추가</label>
-    <div class="add-row">
-      <input id="artist-name" type="text" maxlength="40" placeholder="예: 잔나비, Oasis" required>
-      <button type="submit" class="primary">추가</button>
-    </div>
-    <p class="help">국내 공연 DB(KOPIS), 멜론티켓·인터파크·예스24 티켓오픈 공지, Ticketmaster, 뉴스에서 공연을 찾아요. 1시간 안에 반영돼요.</p>
-    <p class="help" id="artist-pending" hidden></p>
-  </form>
+  <nav class="filters" aria-label="아티스트별로 보기"><button type="button" class="chip" aria-pressed="true" data-filter="">전체 3</button><span class="chip-group" data-artist="Coldplay"><button type="button" class="chip" aria-pressed="false" data-filter="Coldplay">Coldplay 0</button><button type="button" class="chip-x" aria-label="Coldplay 빼기" title="빼기">×</button></span><span class="chip-group" data-artist="Oasis"><button type="button" class="chip" aria-pressed="false" data-filter="Oasis">Oasis 0</button><button type="button" class="chip-x" aria-label="Oasis 빼기" title="빼기">×</button></span><span class="chip-group" data-artist="혁오"><button type="button" class="chip" aria-pressed="false" data-filter="혁오">혁오 3</button><button type="button" class="chip-x" aria-label="혁오 빼기" title="빼기">×</button></span><span class="chip-group" data-artist="실리카겔"><button type="button" class="chip" aria-pressed="false" data-filter="실리카겔">실리카겔 0</button><button type="button" class="chip-x" aria-label="실리카겔 빼기" title="빼기">×</button></span><span class="chip-group" data-artist="Green Day"><button type="button" class="chip" aria-pressed="false" data-filter="Green Day">Green Day 0</button><button type="button" class="chip-x" aria-label="Green Day 빼기" title="빼기">×</button></span><span id="pending-chips"></span>
+    <button type="button" class="chip chip-new" id="add-open" aria-expanded="false">+ 가수 추가</button>
+    <form class="add-pill" id="add-artist" autocomplete="off" hidden>
+      <input id="artist-name" type="text" maxlength="40" placeholder="가수 이름" aria-label="추가할 가수 이름" required>
+      <button type="submit" class="pill-btn go">추가</button>
+      <button type="button" class="pill-btn help-btn" id="add-help-btn" aria-label="어디서 찾나요?" aria-expanded="false" aria-controls="add-help">?</button>
+    </form>
+  </nav>
+  <p class="add-help" id="add-help" hidden>국내 공연 DB(KOPIS), 멜론티켓·인터파크·예스24 티켓오픈 공지, Ticketmaster, 뉴스에서 공연을 찾아요. 추가·삭제는 1시간 안에 반영돼요.</p>
   
   <section class="month"><h2>2027년 1월</h2><ol>
       <li class="show" id="e-f4ab3248bb" data-artist="혁오">
@@ -470,43 +495,105 @@ fieldset.field legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
 
   document.querySelectorAll('.pick[data-key]').forEach((btn) => btn.addEventListener('click', () => openDialog(btn.dataset.key)));
 
-  // ── 가수 추가 ──
+  // ── 가수 추가·빼기 (다음 정시 실행 때 반영, 그 전까지는 이 기기에서 먼저 보여줌) ──
   const ARTIST_PENDING = 'concert-watch-artists-pending';
-  const addForm = document.getElementById('add-artist'), nameIn = document.getElementById('artist-name');
-  const pendingBox = document.getElementById('artist-pending');
-  const known = new Set(Array.from(document.querySelectorAll('.chip[data-filter]'), (c) => c.dataset.filter.toLowerCase()));
-  const showPendingArtists = () => {
+  const addOpen = document.getElementById('add-open'), addForm = document.getElementById('add-artist');
+  const nameIn = document.getElementById('artist-name'), helpBtn = document.getElementById('add-help-btn');
+  const helpBox = document.getElementById('add-help'), pendingWrap = document.getElementById('pending-chips');
+  const known = new Set(Array.from(document.querySelectorAll('.chip-group'), (g) => g.dataset.artist.toLowerCase()));
+  const readArtistPending = () => {
     let list = [];
     try { list = JSON.parse(ls.get(ARTIST_PENDING) || '[]') || []; } catch (e) {}
-    list = list.filter((x) => Date.now() - x.at < 2 * 3600e3 && !known.has(x.name.toLowerCase()));
+    // 2시간이 지났거나 이미 반영된 것은 지운다
+    list = list.filter((x) => Date.now() - x.at < 2 * 3600e3
+      && (x.action === 'add' ? !known.has(x.name.toLowerCase()) : known.has(x.name.toLowerCase())));
     ls.set(ARTIST_PENDING, JSON.stringify(list));
-    pendingBox.hidden = !list.length;
-    pendingBox.textContent = list.length ? `추가 중: ${list.map((x) => x.name).join(', ')} (다음 정시 확인 때 공연을 찾아 넣어요)` : '';
     return list;
   };
+  const showArtistPending = () => {
+    const list = readArtistPending();
+    pendingWrap.replaceChildren(...list.filter((x) => x.action === 'add').map((x) => {
+      const c = document.createElement('span');
+      c.className = 'chip pending'; c.textContent = `${x.name} · 추가 중`;
+      return c;
+    }));
+    const removing = new Set(list.filter((x) => x.action === 'remove').map((x) => x.name.toLowerCase()));
+    document.querySelectorAll('.chip-group').forEach((g) => { g.hidden = removing.has(g.dataset.artist.toLowerCase()); });
+    document.querySelectorAll('.month:not(.plan) .show').forEach((sh) => {
+      if (removing.has((sh.dataset.artist || '').toLowerCase())) sh.hidden = true;
+    });
+  };
+  const pushArtistPending = (action, name) => {
+    const list = readArtistPending().filter((x) => x.name.toLowerCase() !== name.toLowerCase());
+    list.push({ action, name, at: Date.now() });
+    ls.set(ARTIST_PENDING, JSON.stringify(list));
+    showArtistPending();
+  };
+  const canEdit = async () => {
+    if (!DATA.edit.topic) { say('편집 설정(edit_topic)이 없어요.'); return false; }
+    if (DATA.edit.passphrase && !(await keyOk(ls.get(KEY_STORE)))) {
+      say('먼저 예매 계획 창에서 비밀문구를 한 번 넣어주세요.'); return false;
+    }
+    return true;
+  };
+
+  addOpen.addEventListener('click', () => {
+    addOpen.hidden = true; addForm.hidden = false; addOpen.setAttribute('aria-expanded', 'true'); nameIn.focus();
+  });
+  const closeAdd = () => {
+    addForm.hidden = true; addOpen.hidden = false; addOpen.setAttribute('aria-expanded', 'false');
+    helpBox.hidden = true; helpBtn.setAttribute('aria-expanded', 'false');
+  };
+  nameIn.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { nameIn.value = ''; closeAdd(); addOpen.focus(); } });
+  helpBtn.addEventListener('click', () => {
+    helpBox.hidden = !helpBox.hidden; helpBtn.setAttribute('aria-expanded', String(!helpBox.hidden));
+  });
   addForm.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const name = nameIn.value.trim().replace(/\s+/g, ' ');
     if (!name) return;
-    if (known.has(name.toLowerCase())) { say(`${name}은(는) 이미 추적 중이에요.`); return; }
-    if (!DATA.edit.topic || (DATA.edit.passphrase && !(await keyOk(ls.get(KEY_STORE))))) {
-      say('가수를 추가하려면 먼저 예매 계획 창에서 비밀문구를 한 번 넣어주세요.'); return;
+    if (known.has(name.toLowerCase()) && !readArtistPending().some((x) => x.action === 'remove' && x.name.toLowerCase() === name.toLowerCase())) {
+      say(`${name}은(는) 이미 추적 중이에요.`); return;
     }
-    const btn = addForm.querySelector('button');
+    if (!(await canEdit())) return;
+    const btn = addForm.querySelector('.go');
     btn.disabled = true;
     try {
       await post({ action: 'add_artist', name });
-      const list = showPendingArtists().concat([{ name, at: Date.now() }]);
-      ls.set(ARTIST_PENDING, JSON.stringify(list));
-      showPendingArtists();
-      nameIn.value = '';
+      pushArtistPending('add', name);
+      nameIn.value = ''; closeAdd();
       say(`${name}을(를) 추가했어요. 1시간 안에 공연을 찾아 넣고, 예매 오픈 시각이 나온 국내 공연은 자동으로 알려드려요.`);
     } catch (e) { say(`추가하지 못했어요. ${e.message}`); } finally { btn.disabled = false; }
   });
-  showPendingArtists();
+
+  // × 한 번 누르면 '빼기'로 바뀌고, 한 번 더 누르면 뺀다(3초 안에)
+  document.querySelectorAll('.chip-group').forEach((g) => {
+    const x = g.querySelector('.chip-x'), name = g.dataset.artist;
+    let timer = null;
+    const reset = () => { x.classList.remove('confirm'); g.classList.remove('confirming'); x.textContent = '×'; x.setAttribute('aria-label', `${name} 빼기`); };
+    x.addEventListener('click', async () => {
+      if (!x.classList.contains('confirm')) {
+        x.classList.add('confirm'); g.classList.add('confirming'); x.textContent = '빼기';
+        x.setAttribute('aria-label', `${name}을(를) 정말 빼요`);
+        clearTimeout(timer); timer = setTimeout(reset, 3000);
+        return;
+      }
+      clearTimeout(timer);
+      if (!(await canEdit())) { reset(); return; }
+      x.disabled = true;
+      try {
+        await post({ action: 'remove_artist', name });
+        if (g.querySelector('.chip').getAttribute('aria-pressed') === 'true') apply('');
+        pushArtistPending('remove', name);
+        say(`${name}을(를) 뺐어요. 1시간 안에 반영돼요.`);
+      } catch (e) { say(`빼지 못했어요. ${e.message}`); reset(); } finally { x.disabled = false; }
+    });
+  });
+
+  showArtistPending();
 
   // ── 아티스트 필터 ──
-  const chips = document.querySelectorAll('.chip');
+  const chips = document.querySelectorAll('.chip[data-filter]');
   const apply = (name) => {
     chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.filter === name)));
     document.querySelectorAll('.month:not(.plan) .show').forEach((s) => { s.hidden = !!name && s.dataset.artist !== name; });
