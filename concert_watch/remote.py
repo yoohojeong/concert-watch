@@ -18,6 +18,9 @@ import time
 
 import requests
 
+import datetime as dt
+
+from . import artists as artists_store
 from . import picks as picks_store
 
 log = logging.getLogger(__name__)
@@ -81,7 +84,9 @@ def verify(key: bytes | None, body: str, seen: set, now: float) -> dict:
 
 
 def apply_remote(picks: dict, state: dict, passphrase: str | None, repo: str, server: str, topic: str,
-                 now: float | None = None, messages: list[dict] | None = None) -> list[str]:
+                 now: float | None = None, messages: list[dict] | None = None,
+                 artists_data: dict | None = None, cfg: dict | None = None,
+                 added_artists: list[str] | None = None) -> list[str]:
     """ntfy 토픽에 올라온 예매 계획 변경을 picks에 반영하고 결과 문장 목록을 돌려준다.
 
     passphrase가 None이면 서명 없이 받는다(누구나 바꿀 수 있음).
@@ -100,7 +105,17 @@ def apply_remote(picks: dict, state: dict, passphrase: str | None, repo: str, se
             if "이미 반영" not in str(e):
                 log.warning("예매 계획 메시지를 건너뛰어요: %s", e)
             continue
-        done.append(picks_store.apply(picks, got["change"]))
+        change = got["change"]
+        if change["action"] in ("add_artist", "remove_artist"):
+            if artists_data is None:
+                continue
+            line, new_name = artists_store.apply(artists_data, change, cfg or {},
+                                                 dt.datetime.fromtimestamp(now, dt.timezone.utc))
+            done.append(line)
+            if new_name and added_artists is not None:
+                added_artists.append(new_name)
+        else:
+            done.append(picks_store.apply(picks, change))
         seen.add(got["nonce"])
         seen_list.append(got["nonce"])
     del seen_list[:-NONCE_LIMIT]

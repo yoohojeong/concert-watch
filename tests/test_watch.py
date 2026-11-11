@@ -544,3 +544,51 @@ def test_found_time_source_matches_event_source():
     from concert_watch import opentimes
     assert opentimes.candidates_for("melon:1", {}, state)[0]["source"] == "멜론티켓"
     assert opentimes.candidates_for("tm:1", {}, state)[0]["source"] == "Ticketmaster"
+
+
+def test_add_artist_from_page_merges_and_builds_keywords(monkeypatch):
+    import time as _t
+    from concert_watch import artists as ast, remote
+    monkeypatch.setattr(ast, "_aliases", lambda name: ["Jannabi", "잔나비"])
+    cfg = {"artists": [{"name": "혁오"}]}
+    data = {"artists": [], "removed": []}
+    msgs = [{"message": json.dumps({"m": json.dumps({"change": {"action": "add_artist", "name": "잔나비"},
+                                                     "ts": int(_t.time()), "nonce": "a1"})})},
+            {"message": json.dumps({"m": json.dumps({"change": {"action": "add_artist", "name": "혁오"},
+                                                     "ts": int(_t.time()), "nonce": "a2"})})}]
+    added = []
+    done = remote.apply_remote({}, {}, None, "me/repo", "", "", messages=msgs, artists_data=data, cfg=cfg,
+                               added_artists=added)
+    assert added == ["잔나비"] and "이미 추적 중" in done[1]
+    a = data["artists"][0]
+    assert a["kopis_keywords"] == ["잔나비", "Jannabi"] and a["ticketmaster_keyword"] == "Jannabi"
+    assert [x["name"] for x in ast.merged(cfg, data)] == ["혁오", "잔나비"]
+    ast.apply(data, {"action": "remove_artist", "name": "혁오"}, cfg, NOW)
+    assert [x["name"] for x in ast.merged(cfg, data)] == ["잔나비"]
+
+
+def test_interpark_and_yes24_notice_parsing():
+    from concert_watch import sources as s
+    notice = {"ticket_dates": [{"ticket_open_date": "2026-11-20T20:00:00", "ticket_open_type_name": "일반 예매일",
+                                "ticket_other_open_name": ""},
+                               {"ticket_open_date": "2026-11-19T20:00:00", "ticket_open_type_name": "기타 오픈",
+                                "ticket_other_open_name": "팬클럽 선예매"}],
+              "id": 1, "title": "혁오 단독 콘서트", "venue_name": "올림픽홀", "goods_code": "123",
+              "goods_start_date": "2027-01-16T00:00:00", "casting_info": "혁오 (HYUKOH)"}
+    chunk = json.dumps(json.dumps([notice], ensure_ascii=False), ensure_ascii=False)[1:-1]
+    html = f'<script>self.__next_f.push([1,"{chunk}"])</script>'
+    parsed = s.parse_interpark_notices(html)
+    e = s.interpark_event(parsed[0])
+    assert [(c["label"], c["at"][:16]) for c in e["sale_times"]] == [("팬클럽 선예매", "2026-11-19T11:00"),
+                                                                     ("일반 예매", "2026-11-20T11:00")]
+    assert e["url"] == "https://tickets.interpark.com/goods/123" and e["start"] == "2027-01-16"
+
+    yes = ("<input type='hidden' id='hdNotiTitle' value='혁오 콘서트 티켓 오픈 안내' />"
+           '<div class="noti-vt-box"><span><em>티켓오픈</em></span><span id="title1">2026.11.20(금) 오후 8:00</span>'
+           '<span>팬클럽 선예매</span><span id="title2">2026.11.19(목) 오전 11:00</span></div>'
+           '<div class="noti-vt-btns"><a href=\'javascript:jsf_base_GoToUrl(jsf_base_GetSiteDetailURL(61052));\'>상세</a>'
+           "<div class='noti-view-comen-txt'>- 공연일자 : 2027년 1월 16일(토)<br />- 공연장소 : 올림픽홀<br />- 티켓가격 : 1원</div>")
+    n = s.parse_yes24_notice(yes, 9)
+    assert [(c["label"], c["at"][:16]) for c in n["sale_times"]] == [("팬클럽 선예매", "2026-11-19T02:00"),
+                                                                     ("일반 예매", "2026-11-20T11:00")]
+    assert n["venue"] == "올림픽홀" and n["start"] == "2027-01-16" and n["url"].endswith("/Perf/61052")

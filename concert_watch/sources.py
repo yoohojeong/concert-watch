@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import json
 import logging
 import os
 import re
@@ -314,16 +315,6 @@ def parse_melon_notice(html: str, csoon_id: int) -> dict | None:
     }
 
 
-def _melon_artist(notice: dict, artists: list[dict]) -> dict | None:
-    hay = notice["_match_text"].lower()
-    for a in artists:
-        words = [a["name"], a.get("ticketmaster_keyword") or ""] + list(a.get("kopis_keywords") or [])
-        if any(w and w.lower() in hay for w in words) and \
-                not any(x and x.lower() in hay for x in a.get("exclude_keywords") or []):
-            return a
-    return None
-
-
 def fetch_melon(artists: list[dict], state: dict, session: requests.Session | None = None) -> list[dict]:
     """지난번 이후 새로 올라온 멜론티켓 티켓오픈 공지 중 추적 중인 아티스트 공연."""
     s = session or requests.Session()
@@ -340,11 +331,172 @@ def fetch_melon(artists: list[dict], state: dict, session: requests.Session | No
         notice = parse_melon_notice(r.text, csoon_id)
         if not notice:
             continue
-        artist = _melon_artist(notice, artists)
+        artist = _match_artist(notice.pop("_match_text"), artists)
         if artist:
-            notice.pop("_match_text")
             notice["artist"] = artist["name"]
             found.append(notice)
             log.info("멜론티켓 공지 %s: %s %s", csoon_id, artist["name"], notice["title"])
     state["melon_last_id"] = stop
+    return found
+
+
+def _match_artist(text: str, artists: list[dict]) -> dict | None:
+    """공지 제목·출연진 글에 추적 중인 아티스트 이름(또는 키워드)이 있으면 그 아티스트."""
+    hay = (text or "").lower()
+    for a in artists:
+        words = [a["name"], a.get("ticketmaster_keyword") or ""] + list(a.get("kopis_keywords") or [])
+        if any(w and w.lower() in hay for w in words) and \
+                not any(x and x.lower() in hay for x in a.get("exclude_keywords") or []):
+            return a
+    return None
+
+
+def _kst_iso(y: int, mo: int, d: int, h: int, mi: int) -> str:
+    return dt.datetime(y, mo, d, h, mi, tzinfo=_KST).astimezone(dt.timezone.utc).isoformat()
+
+
+def _sale_label(name: str) -> str:
+    n = (name or "").replace(" ", "")
+    return "일반 예매" if n in ("", "티켓오픈", "일반예매", "일반예매일", "일반오픈") else " ".join(name.split())
+
+
+# ── 인터파크(NOL) 티켓오픈 공지 ───────────────────────────
+# 공지 목록 페이지 안에 공지 데이터(JSON)가 들어 있어 한 번 요청으로 다가오는 오픈 공지를 모두 읽는다.
+INTERPARK_LIST = "https://tickets.interpark.com/contents/notice"
+INTERPARK_GOODS = "https://tickets.interpark.com/goods/{code}"
+
+
+def parse_interpark_notices(html: str) -> list[dict]:
+    chunks = re.findall(r'self\.__next_f\.push\(\[1,"((?:[^"\\]|\\.)*)"\]\)', html)
+    text = "".join(json.loads(f'"{c}"') for c in chunks)
+    dec, items = json.JSONDecoder(), {}
+    for m in re.finditer(r'\{"ticket_dates":', text):
+        try:
+            obj, _ = dec.raw_decode(text, m.start())
+        except ValueError:
+            continue
+        if isinstance(obj, dict) and obj.get("id"):
+            items[obj["id"]] = obj
+    return list(items.values())
+
+
+def interpark_event(n: dict) -> dict:
+    sale_times = []
+    for d in n.get("ticket_dates") or []:
+        try:
+            local = dt.datetime.fromisoformat(d["ticket_open_date"]).replace(tzinfo=_KST)
+        except (KeyError, TypeError, ValueError):
+            continue
+        label = d.get("ticket_other_open_name") or d.get("ticket_open_type_name") or ""
+        sale_times.append({"label": _sale_label(label), "at": local.astimezone(dt.timezone.utc).isoformat()})
+    sale_times.sort(key=lambda c: c["at"])
+    start = (n.get("goods_start_date") or "")[:10]
+    code = n.get("goods_code") or ""
+    url = INTERPARK_GOODS.format(code=code) if code else INTERPARK_LIST
+    return {
+        "key": f"interpark:{n['id']}", "source": "interpark", "title": n.get("title") or n.get("goods_name") or "",
+        "start": start, "end": (n.get("goods_end_date") or "")[:10] or start, "time": "",
+        "venue": n.get("venue_name") or "", "city": "", "country": "KR", "url": url,
+        "ticket_links": [{"name": "인터파크", "url": url}],
+        "sale_start": next((c["at"] for c in sale_times if c["label"] == "일반 예매"), ""),
+        "sale_times": sale_times,
+    }
+
+
+def fetch_interpark(artists: list[dict], session: requests.Session | None = None) -> list[dict]:
+    s = session or requests.Session()
+    r = s.get(INTERPARK_LIST, headers=MELON_HEADERS, timeout=TIMEOUT)
+    r.raise_for_status()
+    notices = parse_interpark_notices(r.text)
+    if not notices:
+        raise SourceError("인터파크 티켓오픈 공지를 읽지 못했어요(페이지 구조가 바뀌었을 수 있어요)")
+    found = []
+    for n in notices:
+        artist = _match_artist(" ".join([n.get("title") or "", n.get("goods_name") or "",
+                                         re.sub(r"<[^>]+>", " ", n.get("casting_info") or "")]), artists)
+        if artist:
+            e = interpark_event(n)
+            e["artist"] = artist["name"]
+            found.append(e)
+            log.info("인터파크 공지 %s: %s %s", n["id"], artist["name"], e["title"])
+    return found
+
+
+# ── 예스24 티켓오픈 공지 ─────────────────────────────────
+YES24_LIST = "http://ticket.yes24.com/New/Notice/Ajax/axList.aspx"
+YES24_READ = "http://ticket.yes24.com/New/Notice/Ajax/axRead.aspx"
+YES24_NOTICE = "http://ticket.yes24.com/Notice?#id={id}"
+YES24_PERF = "http://ticket.yes24.com/Perf/{id}"
+YES24_PAGES = 2
+YES24_PAGE_SIZE = 20
+_YES24_DT = re.compile(r"(20\d{2})\.(\d{1,2})\.(\d{1,2})[^0-9]*?(오전|오후)?\s*(\d{1,2}):(\d{2})")
+
+
+def parse_yes24_notice(html: str, notice_id: int) -> dict | None:
+    m = re.search(r"id='hdNotiTitle' value='(.*?)'", html, re.S)
+    if not m:
+        return None
+    title = re.sub(r"\s*티켓\s*오픈\s*안내\s*$", "", _strip_tags(m.group(1)))
+    sale_times = []
+    box = (re.search(r'class="noti-vt-box">(.*?)class="noti-vt-btns"', html, re.S) or re.search(r"(.*)", html, re.S)).group(1)
+    for label, when in re.findall(r'<span>\s*(?:<em>)?([^<]*?)(?:</em>)?\s*</span>\s*<span id="title\d+">([^<]*)</span>', box):
+        d = _YES24_DT.search(_strip_tags(when))
+        if not d:
+            continue
+        y, mo, da, ampm, h, mi = d.groups()
+        h = int(h)
+        if ampm == "오후" and h < 12:
+            h += 12
+        elif ampm == "오전" and h == 12:
+            h = 0
+        sale_times.append({"label": _sale_label(_strip_tags(label)), "at": _kst_iso(int(y), int(mo), int(da), h, int(mi))})
+    om = re.search(r"noti-view-comen-txt'>(.*?)</div>", html, re.S)
+    overview = _strip_tags(re.sub(r"<br\s*/?>", " ", om.group(1))) if om else ""
+    start = ""
+    pm = re.search(r"공연\s*(?:일자|일|기간|일시)\s*:\s*(.{0,60})", overview)
+    if pm and (d := _KO_DATE.search(pm.group(1))):
+        start = dt.date(*map(int, d.groups())).isoformat()
+    vm = re.search(r"공연\s*장소\s*:\s*(.+?)(?:\s+-\s|$)", overview)
+    perf = re.search(r"GetSiteDetailURL\((\d+)\)", html)
+    url = YES24_PERF.format(id=perf.group(1)) if perf else YES24_NOTICE.format(id=notice_id)
+    return {
+        "key": f"yes24:{notice_id}", "source": "yes24", "title": title, "start": start, "end": start, "time": "",
+        "venue": vm.group(1).strip()[:80] if vm else "", "city": "", "country": "KR", "url": url,
+        "ticket_links": [{"name": "예스24", "url": url}],
+        "sale_start": next((c["at"] for c in sale_times if c["label"] == "일반 예매"), ""),
+        "sale_times": sorted(sale_times, key=lambda c: c["at"]),
+        "_match_text": " ".join([title, overview[:300]]),
+    }
+
+
+def fetch_yes24(artists: list[dict], state: dict, session: requests.Session | None = None) -> list[dict]:
+    """예스24 티켓오픈 공지 목록에서 처음 보는 공지만 열어 추적 중인 아티스트 공연을 찾는다."""
+    s = session or requests.Session()
+    ids: list[int] = []
+    for page in range(1, YES24_PAGES + 1):
+        r = s.post(YES24_LIST, data={"page": page, "size": YES24_PAGE_SIZE, "genre": "", "province": "",
+                                     "order": 1, "searchType": "All", "searchText": ""},
+                   headers=MELON_HEADERS, timeout=TIMEOUT)
+        r.raise_for_status()
+        ids += [int(i) for i in re.findall(r'href="#id=(\d+)"', r.text)]
+    if not ids:
+        raise SourceError("예스24 티켓오픈 공지 목록을 읽지 못했어요")
+    seen = state.setdefault("yes24_seen", [])
+    seen_set = set(seen)
+    found = []
+    for nid in sorted(set(ids) - seen_set):
+        time.sleep(MELON_PAUSE)
+        r = s.post(YES24_READ, data={"bId": nid, "genre": "", "province": "", "order": 1},
+                   headers=MELON_HEADERS, timeout=TIMEOUT)
+        r.raise_for_status()
+        notice = parse_yes24_notice(r.text, nid)
+        seen.append(nid)
+        if not notice:
+            continue
+        artist = _match_artist(notice.pop("_match_text"), artists)
+        if artist:
+            notice["artist"] = artist["name"]
+            found.append(notice)
+            log.info("예스24 공지 %s: %s %s", nid, artist["name"], notice["title"])
+    del seen[:-1000]
     return found

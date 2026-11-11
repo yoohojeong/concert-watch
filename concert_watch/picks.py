@@ -51,6 +51,11 @@ def validate_change(data: dict) -> dict:
     if not isinstance(data, dict):
         raise ValueError("변경 내용이 올바르지 않아요")
     action, key = data.get("action"), data.get("key")
+    if action in ("add_artist", "remove_artist"):
+        name = " ".join(str(data.get("name") or "").split())
+        if not 1 <= len(name) <= 40 or re.search(r"[<>{}\\]", name):
+            raise ValueError("아티스트 이름이 올바르지 않아요")
+        return {"action": action, "name": name}
     if action not in ("set", "delete"):
         raise ValueError(f"알 수 없는 동작: {action!r}")
     if not isinstance(key, str) or not key or len(key) > 200:

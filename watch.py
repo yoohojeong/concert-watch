@@ -19,7 +19,7 @@ from zoneinfo import ZoneInfo
 
 import yaml
 
-from concert_watch import notify, official, opentimes, picks as picks_store, reminders, remote, site, sources
+from concert_watch import artists as artists_store, notify, official, opentimes, picks as picks_store, reminders, remote, site, sources
 
 ROOT = Path(__file__).resolve().parent
 log = logging.getLogger("concert-watch")
@@ -195,8 +195,9 @@ def sample_event(today: dt.date) -> dict:
     }
 
 
-def apply_remote_edits(cfg: dict, state: dict, all_picks: dict) -> bool:
-    """웹페이지에서 비밀문구로 보낸 예매 계획 변경(ntfy)을 반영한다. 바뀐 게 있으면 True."""
+def apply_remote_edits(cfg: dict, state: dict, all_picks: dict, artists_data: dict | None = None,
+                       added_artists: list[str] | None = None) -> bool:
+    """웹페이지에서 보낸 예매 계획·아티스트 변경(ntfy)을 반영한다. 바뀐 게 있으면 True."""
     site_cfg = cfg.get("site") or {}
     topic = site_cfg.get("edit_topic")
     repo = os.environ.get("GITHUB_REPOSITORY") or site_cfg.get("repo", "")
@@ -210,7 +211,8 @@ def apply_remote_edits(cfg: dict, state: dict, all_picks: dict) -> bool:
         return False
     try:
         return bool(remote.apply_remote(all_picks, state, passphrase, repo,
-                                        site_cfg.get("ntfy_server") or "https://ntfy.sh", topic))
+                                        site_cfg.get("ntfy_server") or "https://ntfy.sh", topic,
+                                        artists_data=artists_data, cfg=cfg, added_artists=added_artists))
     except Exception as e:
         log.error("웹페이지에서 보낸 예매 계획 변경을 읽지 못했어요: %s", e)
         return False
@@ -256,7 +258,16 @@ def main() -> int:
         log.info(result)
         _write_output("result", result)
     all_picks = load_picks(picks_path)
-    picks_changed = apply_remote_edits(cfg, state, all_picks)
+    artists_path = ROOT / "data" / "artists.json"
+    artists_data = artists_store.load(artists_path)
+    base_artists = list(cfg.get("artists") or [])
+    cfg["artists"] = artists_store.merged({"artists": base_artists}, artists_data)
+    before = json.dumps(artists_data, sort_keys=True)
+    new_artists: list[str] = []
+    picks_changed = apply_remote_edits(cfg, state, all_picks, artists_data, new_artists)
+    if json.dumps(artists_data, sort_keys=True) != before:
+        artists_store.save(artists_path, artists_data)
+        cfg["artists"] = artists_store.merged({"artists": base_artists}, artists_data)
 
     if args.reminders_only or args.apply_issue:
         if picks_changed:
@@ -268,18 +279,34 @@ def main() -> int:
         return 0
 
     events, errors = None, []
-    if args.force_api or api_due(cfg, state, now):
+    if new_artists:
+        log.info("새 아티스트 %s → 모든 소스를 지금 확인해요", ", ".join(new_artists))
+    if args.force_api or new_artists or api_due(cfg, state, now):
         events, errors = collect(cfg, now.date())
     else:
         log.info("공연 API는 %s시간마다 확인해요. 이번에는 공식 채널만 확인할게요",
                  cfg.get("api_interval_hours", 3))
     news, news_errors = official.check(cfg, state, now)
+    # 예매처 티켓오픈 공지(매시간). 한 곳이 실패해도 나머지는 계속한다.
     melon: list[dict] = []
-    try:
-        melon = sources.fetch_melon(cfg.get("artists") or [], state)
-    except Exception as e:
-        news_errors.append(f"멜론티켓({e.__class__.__name__})")
-        log.error("멜론티켓 티켓오픈소식 확인 실패: %s", e)
+    artists = cfg.get("artists") or []
+    for label, fetch in [("멜론티켓", lambda: sources.fetch_melon(artists, state)),
+                         ("인터파크", lambda: sources.fetch_interpark(artists)),
+                         ("예스24", lambda: sources.fetch_yes24(artists, state))]:
+        try:
+            melon += fetch()
+        except Exception as e:
+            news_errors.append(f"{label}({e.__class__.__name__})")
+            log.error("%s 티켓오픈 공지 확인 실패: %s", label, e)
+    # 새로 추가한 아티스트는 이미 지나간 공지도 거슬러 올라가 찾는다
+    fresh = [a for a in artists if a["name"] in new_artists]
+    if fresh:
+        for label, fetch in [("멜론티켓", lambda: sources.fetch_melon(fresh, {})),
+                             ("예스24", lambda: sources.fetch_yes24(fresh, {}))]:
+            try:
+                melon += fetch()
+            except Exception as e:
+                log.error("%s 지난 공지 확인 실패: %s", label, e)
 
     kopis_key = os.environ.get("KOPIS_API_KEY")
     enrich = (lambda e: sources.enrich_kopis(e, kopis_key)

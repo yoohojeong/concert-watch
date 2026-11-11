@@ -250,6 +250,10 @@ fieldset.field legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
 .actions button:disabled { opacity: .6; cursor: progress; }
 @media (max-width: 30rem) { .show { grid-template-columns: 3.25rem 1fr; gap: .75rem; }
   .day .num { font-size: 2.2rem; } }
+.add-artist { margin: 1rem 0 1.5rem; }
+.add-artist label { display: block; font-weight: 600; margin-bottom: .35rem; }
+.add-artist .add-row { display: flex; gap: .5rem; }
+.add-artist input { flex: 1; min-width: 0; }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 """
 
@@ -455,6 +459,13 @@ SCRIPT = r"""
     }
     return true;
   };
+  const post = async (change) => {
+    const k = ls.get(KEY_STORE);
+    const m = JSON.stringify({ change, ts: Math.floor(Date.now() / 1000), nonce: hex(crypto.getRandomValues(new Uint8Array(12))) });
+    const body = DATA.edit.passphrase ? { m, s: await hmacHex(k, m) } : { m };
+    const r = await fetch(`${DATA.edit.server}/${DATA.edit.topic}`, { method: 'POST', body: JSON.stringify(body) });
+    if (!r.ok) throw new Error(`ntfy 응답 ${r.status}`);
+  };
   const sendChange = async (change) => {
     let k = ls.get(KEY_STORE);
     if (DATA.edit.passphrase && !(await keyOk(k))) {
@@ -465,10 +476,7 @@ SCRIPT = r"""
       if (!(await keyOk(k))) { f.passField.hidden = false; throw new Error('비밀문구가 맞지 않아요.'); }
       ls.set(KEY_STORE, k);
     }
-    const m = JSON.stringify({ change, ts: Math.floor(Date.now() / 1000), nonce: hex(crypto.getRandomValues(new Uint8Array(12))) });
-    const body = DATA.edit.passphrase ? { m, s: await hmacHex(k, m) } : { m };
-    const r = await fetch(`${DATA.edit.server}/${DATA.edit.topic}`, { method: 'POST', body: JSON.stringify(body) });
-    if (!r.ok) throw new Error(`ntfy 응답 ${r.status}`);
+    await post(change);
     const pend = readPending();
     pend[change.key] = { change, at: Date.now() };
     ls.set(PENDING_STORE, JSON.stringify(pend));
@@ -518,6 +526,41 @@ SCRIPT = r"""
   f.close.addEventListener('click', () => dlg.close());
 
   document.querySelectorAll('.pick[data-key]').forEach((btn) => btn.addEventListener('click', () => openDialog(btn.dataset.key)));
+
+  // ── 가수 추가 ──
+  const ARTIST_PENDING = 'concert-watch-artists-pending';
+  const addForm = document.getElementById('add-artist'), nameIn = document.getElementById('artist-name');
+  const pendingBox = document.getElementById('artist-pending');
+  const known = new Set(Array.from(document.querySelectorAll('.chip[data-filter]'), (c) => c.dataset.filter.toLowerCase()));
+  const showPendingArtists = () => {
+    let list = [];
+    try { list = JSON.parse(ls.get(ARTIST_PENDING) || '[]') || []; } catch (e) {}
+    list = list.filter((x) => Date.now() - x.at < 2 * 3600e3 && !known.has(x.name.toLowerCase()));
+    ls.set(ARTIST_PENDING, JSON.stringify(list));
+    pendingBox.hidden = !list.length;
+    pendingBox.textContent = list.length ? `추가 중: ${list.map((x) => x.name).join(', ')} (다음 정시 확인 때 공연을 찾아 넣어요)` : '';
+    return list;
+  };
+  addForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const name = nameIn.value.trim().replace(/\s+/g, ' ');
+    if (!name) return;
+    if (known.has(name.toLowerCase())) { say(`${name}은(는) 이미 추적 중이에요.`); return; }
+    if (!DATA.edit.topic || (DATA.edit.passphrase && !(await keyOk(ls.get(KEY_STORE))))) {
+      say('가수를 추가하려면 먼저 예매 계획 창에서 비밀문구를 한 번 넣어주세요.'); return;
+    }
+    const btn = addForm.querySelector('button');
+    btn.disabled = true;
+    try {
+      await post({ action: 'add_artist', name });
+      const list = showPendingArtists().concat([{ name, at: Date.now() }]);
+      ls.set(ARTIST_PENDING, JSON.stringify(list));
+      showPendingArtists();
+      nameIn.value = '';
+      say(`${name}을(를) 추가했어요. 1시간 안에 공연을 찾아 넣고, 예매 오픈 시각이 나온 국내 공연은 자동으로 알려드려요.`);
+    } catch (e) { say(`추가하지 못했어요. ${e.message}`); } finally { btn.disabled = false; }
+  });
+  showPendingArtists();
 
   // ── 아티스트 필터 ──
   const chips = document.querySelectorAll('.chip');
@@ -574,7 +617,6 @@ def render_html(state: dict, cfg: dict, now: dt.datetime, picks: dict | None = N
         for a in artists
     ]
 
-    names = ", ".join(artists[:3]) + (f" 외 {len(artists) - 3}팀" if len(artists) > 3 else "")
     checked_txt = ""
     if state.get("last_checked"):
         c = dt.datetime.fromisoformat(state["last_checked"])
@@ -599,12 +641,21 @@ def render_html(state: dict, cfg: dict, now: dt.datetime, picks: dict | None = N
 <main class="wrap">
   <header>
     <h1>{title}</h1>
-    <p>{escape(names)}의 공연을 추적하고 있어요. {escape(checked_txt)}</p>
+    <p>{escape(checked_txt)}</p>
     {error_html}
     <p class="status" id="status" role="status" aria-live="polite"></p>
   </header>
   <section class="month plan" id="plan" hidden><h2>내 예매 계획</h2><ol></ol></section>
   <nav class="filters" aria-label="아티스트별로 보기">{"".join(chips)}</nav>
+  <form class="add-artist" id="add-artist" autocomplete="off">
+    <label for="artist-name">가수 추가</label>
+    <div class="add-row">
+      <input id="artist-name" type="text" maxlength="40" placeholder="예: 잔나비, Oasis" required>
+      <button type="submit" class="primary">추가</button>
+    </div>
+    <p class="help">국내 공연 DB(KOPIS), 멜론티켓·인터파크·예스24 티켓오픈 공지, Ticketmaster, 뉴스에서 공연을 찾아요. 1시간 안에 반영돼요.</p>
+    <p class="help" id="artist-pending" hidden></p>
+  </form>
   {news_html}
   {body}
   <footer>
