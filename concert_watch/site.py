@@ -1,7 +1,7 @@
 """수집한 공연을 GitHub Pages용 웹페이지(docs/index.html)로 만든다.
 
-페이지에서 '예매할게요'를 저장하면 내용이 채워진 GitHub 이슈 작성 화면이 열린다. 저장소 주인이 제출하면
-GitHub Actions가 data/picks.json에 반영한다(concert_watch/picks.py). 페이지에는 토큰이 필요 없다.
+페이지에서 '예매할게요'를 저장하면 변경 내용을 비밀문구로 서명해 ntfy 토픽에 올린다. GitHub Actions가 다음 실행 때
+서명을 확인하고 data/picks.json에 반영한다(concert_watch/remote.py). GitHub 로그인이나 토큰은 필요 없다.
 """
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from collections import Counter
 from html import escape
 from pathlib import Path
 
-from . import opentimes
+from . import opentimes, remote
 from .notify import anchor_id
 
 WEEKDAYS = "월화수목금토일"
@@ -120,6 +120,15 @@ def _news_item(n: dict) -> str:
       </li>"""
 
 
+def _edit_info(site: dict) -> dict:
+    """웹페이지에서 예매 계획을 바꿀 때 쓰는 ntfy 토픽과 비밀문구 확인값."""
+    repo = os.environ.get("GITHUB_REPOSITORY") or site.get("repo", "")
+    passphrase = os.environ.get("PICK_PASSPHRASE")
+    check = remote.check_value(remote.derive_key(passphrase, repo)) if passphrase and repo else ""
+    return {"topic": site.get("edit_topic", ""), "server": (site.get("ntfy_server") or "https://ntfy.sh").rstrip("/"),
+            "check": check}
+
+
 def _page_data(shows: list[dict], news: list[dict], picks: dict, cfg: dict, state: dict) -> str:
     items = {}
     for e in shows:
@@ -144,6 +153,7 @@ def _page_data(shows: list[dict], news: list[dict], picks: dict, cfg: dict, stat
         "items": items,
         "times": times,
         "picks": picks,
+        "edit": _edit_info(site),
     }
     # </script> 안전 처리
     return json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
@@ -246,7 +256,24 @@ SCRIPT = r"""
 (() => {
   const DATA = JSON.parse(document.getElementById('page-data').textContent);
   const WD = '일월화수목금토';
-  let picks = DATA.picks || {};
+  const KEY_STORE = 'concert-watch-key', PENDING_STORE = 'concert-watch-pending';
+  const ls = {
+    get: (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} },
+  };
+  const readPending = () => { try { return JSON.parse(ls.get(PENDING_STORE) || '{}') || {}; } catch (e) { return {}; } };
+  // 보냈지만 아직 Actions가 반영하지 않은 변경(최대 2시간)을 화면에 먼저 보여준다
+  const withPending = (base) => {
+    const out = { ...(base || {}) }, pend = readPending(), now = Date.now();
+    Object.entries(pend).forEach(([k, v]) => {
+      if (!v || now - v.at > 2 * 3600e3) { delete pend[k]; return; }
+      if (v.change.action === 'delete') out[k] = { ...(out[k] || {}), mode: 'off' }; else out[k] = v.change.pick;
+    });
+    ls.set(PENDING_STORE, JSON.stringify(pend));
+    return out;
+  };
+  const activeOnly = (all) => Object.fromEntries(Object.entries(all || {}).filter(([, p]) => p && p.mode !== 'off'));
+  let picks = activeOnly(withPending(DATA.picks));
 
   // ── 날짜 ──
   const pad = (n) => String(n).padStart(2, '0');
@@ -274,14 +301,20 @@ SCRIPT = r"""
     const j = await r.json();
     return { picks: (JSON.parse(b64decode(j.content)).picks) || {} };
   };
-  // 이슈 본문의 표시(<!-- concert-watch-pick -->)와 JSON을 Actions가 읽는다(concert_watch/picks.py)
-  const openIssue = (title, change) => {
-    const body = '이 화면에서 **Create** 를 누르면 예매 계획이 저장돼요. 1분쯤 뒤 웹페이지를 새로 고치면 보여요.\n'
-      + '아래 내용은 고치지 마세요.\n\n<!-- concert-watch-pick -->\n```json\n' + JSON.stringify(change, null, 2) + '\n```\n';
-    const url = `https://github.com/${DATA.repo}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
-    const w = window.open(url, '_blank');
-    if (w) w.opener = null; else location.href = url;
+  // ── 비밀문구 서명 → ntfy (concert_watch/remote.py와 같은 방식) ──
+  const enc = new TextEncoder();
+  const hex = (buf) => Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, '0')).join('');
+  const unhex = (h) => Uint8Array.from(h.match(/../g), (x) => parseInt(x, 16));
+  const deriveKey = async (pass) => {
+    const base = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveBits']);
+    return hex(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256',
+      salt: enc.encode(`concert-watch:${DATA.repo}`), iterations: 200000 }, base, 256));
   };
+  const hmacHex = async (keyHex, text) => {
+    const k = await crypto.subtle.importKey('raw', unhex(keyHex), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    return hex(await crypto.subtle.sign('HMAC', k, enc.encode(text)));
+  };
+  const keyOk = async (k) => !!k && (await hmacHex(k, 'concert-watch-check')) === DATA.edit.check;
 
   // ── 화면 ──
   const status = document.getElementById('status');
@@ -361,7 +394,7 @@ SCRIPT = r"""
     title: dlg.querySelector('h2'), sub: dlg.querySelector('.sub'), open: dlg.querySelector('#open-at'),
     modes: dlg.querySelectorAll('input[name="mode"]'), autoBox: dlg.querySelector('#auto-box'),
     manualBox: dlg.querySelector('#manual-box'), autoList: dlg.querySelector('#auto-list'), autoHelp: dlg.querySelector('#auto-help'),
-    link: dlg.querySelector('#link'), error: dlg.querySelector('.error'), save: dlg.querySelector('#save'),
+    link: dlg.querySelector('#link'), pass: dlg.querySelector('#pass'), passField: dlg.querySelector('#pass-field'), error: dlg.querySelector('.error'), save: dlg.querySelector('#save'),
     remove: dlg.querySelector('#remove'), close: dlg.querySelector('#close'),
   };
   let currentKey = null;
@@ -407,18 +440,52 @@ SCRIPT = r"""
 
     f.link.value = (p && p.link) || item.link || '';
     f.remove.hidden = !p;
+    f.passField.hidden = !!ls.get(KEY_STORE);
+    f.pass.value = '';
     f.save.textContent = p ? '변경 저장' : '저장';
     dlg.showModal();
     (dlg.querySelector('input[name="mode"]:checked') || f.modes[0]).focus();
   };
 
   const ready = () => {
-    if (!DATA.repo) { f.error.textContent = '저장소 정보가 없어요. GitHub Actions가 만든 페이지에서 사용하세요.'; return false; }
+    if (!DATA.repo || !DATA.edit.topic || !DATA.edit.check) {
+      f.error.textContent = '아직 비밀문구가 설정되지 않았어요. README의 "예매 계획 저장"대로 PICK_PASSPHRASE Secret을 넣어주세요.';
+      return false;
+    }
     return true;
   };
-  const sent = (text) => {
-    dlg.close();
-    say(`GitHub 이슈 화면을 열었어요. 거기서 Create를 누르면 1분쯤 뒤 저장돼요. ${text}`);
+  const sendChange = async (change) => {
+    let k = ls.get(KEY_STORE);
+    if (!(await keyOk(k))) {
+      ls.set(KEY_STORE, null);
+      const pass = f.pass.value;
+      if (!pass) { f.passField.hidden = false; f.pass.focus(); throw new Error('비밀문구를 넣어주세요.'); }
+      k = await deriveKey(pass);
+      if (!(await keyOk(k))) { f.passField.hidden = false; throw new Error('비밀문구가 맞지 않아요.'); }
+      ls.set(KEY_STORE, k);
+    }
+    const m = JSON.stringify({ change, ts: Math.floor(Date.now() / 1000), nonce: hex(crypto.getRandomValues(new Uint8Array(12))) });
+    const r = await fetch(`${DATA.edit.server}/${DATA.edit.topic}`, { method: 'POST', body: JSON.stringify({ m, s: await hmacHex(k, m) }) });
+    if (!r.ok) throw new Error(`ntfy 응답 ${r.status}`);
+    const pend = readPending();
+    pend[change.key] = { change, at: Date.now() };
+    ls.set(PENDING_STORE, JSON.stringify(pend));
+    picks = activeOnly(withPending(picks));
+    render();
+  };
+  const submit = async (change, done) => {
+    if (!ready()) return;
+    const label = f.save.textContent;
+    [f.save, f.remove, f.close].forEach((b) => { b.disabled = true; });
+    f.save.textContent = '저장하는 중…';
+    try {
+      await sendChange(change);
+      dlg.close();
+      say(`저장했어요. 1시간 안에 반영돼요. ${done}`);
+    } catch (e) { f.error.textContent = e.message; } finally {
+      [f.save, f.remove, f.close].forEach((b) => { b.disabled = false; });
+      f.save.textContent = label;
+    }
   };
 
   f.save.addEventListener('click', () => {
@@ -439,15 +506,12 @@ SCRIPT = r"""
       start: prev.start || item.start || '', mode: m, open_at: m === 'manual' ? d.toISOString() : '',
       link, picked_at: prev.picked_at || new Date().toISOString(),
     };
-    openIssue(`예매 계획: ${record.artist} ${m === 'manual' ? fmt(d) : '자동'}`, { action: 'set', key, pick: record });
-    sent(describe(key, record));
+    submit({ action: 'set', key, pick: record }, describe(key, record));
   });
 
   f.remove.addEventListener('click', () => {
     if (!ready()) return;
-    const key = currentKey, name = (picks[key] && picks[key].artist) || '';
-    openIssue(`예매 계획 취소: ${name}`, { action: 'delete', key });
-    sent('취소해도 3시간 안에 예정된 알림은 이미 예약돼 있어서 한 번 더 올 수 있어요.');
+    submit({ action: 'delete', key: currentKey }, '취소해도 3시간 안에 예정된 알림은 이미 예약돼 있어서 한 번 더 올 수 있어요.');
   });
   f.close.addEventListener('click', () => dlg.close());
 
@@ -473,7 +537,10 @@ SCRIPT = r"""
   render();
   focusHash();
   setInterval(render, 60000);
-  if (DATA.repo) readPicks().then((r) => { picks = r.picks; render(); }).catch(() => {});
+  if (DATA.repo) readPicks().then((r) => { picks = activeOnly(withPending(r.picks)); render(); }).catch(() => {});
+  const forget = document.getElementById('forget');
+  forget.hidden = !ls.get(KEY_STORE);
+  forget.addEventListener('click', () => { ls.set(KEY_STORE, null); forget.hidden = true; say('이 기기에서 비밀문구를 지웠어요.'); });
 })();
 """
 
@@ -540,6 +607,7 @@ def render_html(state: dict, cfg: dict, now: dt.datetime, picks: dict | None = N
   {body}
   <footer>
     <p>공연 일정은 KOPIS 공연예술통합전산망(국내)과 Ticketmaster(해외), 공식 소식은 아티스트의 공식 인스타그램과 웹사이트에서 가져와요. 예매 전에 공식 예매처에서 다시 확인하세요.</p>
+    <p><button type="button" id="forget" hidden>이 기기에서 비밀문구 지우기</button></p>
   </footer>
 </main>
 
@@ -564,7 +632,11 @@ def render_html(state: dict, cfg: dict, now: dt.datetime, picks: dict | None = N
     <input id="link" type="url" inputmode="url" placeholder="https://">
     <p class="help">알림을 누르면 이 링크로 바로 가요. 비워둬도 돼요.</p>
   </div>
-  <p class="help">저장하면 GitHub 이슈 화면이 열려요. GitHub에 로그인한 채로 Create를 누르면 저장돼요.</p>
+  <div class="field" id="pass-field" hidden>
+    <label for="pass">비밀문구</label>
+    <input id="pass" type="password" autocomplete="current-password" spellcheck="false">
+    <p class="help">GitHub Secret PICK_PASSPHRASE에 넣은 문구예요. 이 기기에서 처음 한 번만 넣으면 돼요.</p>
+  </div>
   <p class="error" role="alert"></p>
   <div class="actions">
     <button type="button" class="primary" id="save">저장</button>

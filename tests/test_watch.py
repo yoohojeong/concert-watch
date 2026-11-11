@@ -457,7 +457,8 @@ def test_issue_sets_and_deletes_pick(tmp_path):
     assert "혁오" in msg and saved["mode"] == "manual" and saved["link"] == "" and "extra" not in saved
 
     watch.apply_issue(_event(tmp_path, _issue_body({"action": "delete", "key": "kopis:PF1"})), picks_path)
-    assert picks_store.load(picks_path) == {}
+    assert picks_store.load(picks_path)["kopis:PF1"]["mode"] == "off"      # 지우지 않고 꺼둔다
+    assert picks_store.active(picks_store.load(picks_path)) == {}
 
 
 def test_issue_from_other_user_or_bad_body_is_rejected(tmp_path):
@@ -490,3 +491,36 @@ def test_news_search_baseline_then_only_fresh_announcements(monkeypatch):
     assert errors == [] and len(news) == 1
     assert news[0]["source"] == "news" and news[0]["url"] == "https://n/b" and "티켓 오픈" in news[0]["text"]
     assert official.check(cfg, state, NOW)[0] == []                  # 같은 기사는 다시 안 알림
+
+
+def test_auto_add_only_future_kr_sales_and_respects_cancel():
+    from concert_watch import picks as ps
+    future, past = (NOW + dt.timedelta(days=1)).isoformat(), (NOW - dt.timedelta(days=1)).isoformat()
+    state = {"events": {
+        "melon:1": {"artist": "혁오", "title": "서울", "country": "KR", "sale_times": [{"label": "일반 예매", "at": future}],
+                    "ticket_links": [{"url": "https://ticket.melon.com/x"}]},
+        "melon:2": {"artist": "혁오", "title": "지난", "country": "KR", "sale_times": [{"label": "일반 예매", "at": past}]},
+        "tm:3": {"artist": "혁오", "title": "토론토", "country": "CA", "sale_times": [{"label": "일반 예매", "at": future}]},
+        "melon:4": {"artist": "모르는팀", "title": "x", "country": "KR", "sale_times": [{"label": "일반 예매", "at": future}]},
+        "melon:5": {"artist": "혁오", "title": "취소함", "country": "KR", "sale_times": [{"label": "일반 예매", "at": future}]},
+    }}
+    picks = {"melon:5": {"mode": "off"}}
+    cfg = {"artists": [{"name": "혁오"}]}
+    assert ps.auto_add(picks, state, cfg, NOW) == ["melon:1"]
+    assert picks["melon:1"]["mode"] == "auto" and picks["melon:1"]["link"] == "https://ticket.melon.com/x"
+    assert picks["melon:5"]["mode"] == "off" and set(ps.active(picks)) == {"melon:1"}
+
+
+def test_remote_edit_signed_by_passphrase_only():
+    import time as _t
+    from concert_watch import remote
+    key = remote.derive_key("긴 비밀 문구 하나", "me/repo")
+    m = json.dumps({"change": {"action": "set", "key": "melon:1", "pick": {"artist": "혁오", "mode": "auto"}},
+                    "ts": int(_t.time()), "nonce": "n1"})
+    good = json.dumps({"m": m, "s": remote.sign(key, m)})
+    forged = json.dumps({"m": m, "s": remote.sign(remote.derive_key("틀린 문구", "me/repo"), m)})
+    picks, state = {}, {}
+    run = lambda body: remote.apply_remote(picks, state, "긴 비밀 문구 하나", "me/repo", "", "", messages=[{"message": body}])
+    assert run(forged) == [] and picks == {}
+    assert len(run(good)) == 1 and picks["melon:1"]["artist"] == "혁오"
+    assert run(good) == []                                            # 같은 메시지는 한 번만

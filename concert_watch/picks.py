@@ -12,6 +12,8 @@ import logging
 import re
 from pathlib import Path
 
+from .notify import anchor_id
+
 log = logging.getLogger(__name__)
 MARKER = "<!-- concert-watch-pick -->"
 TEXT_FIELDS = ("artist", "title", "anchor", "country", "start", "link", "picked_at", "open_at", "mode")
@@ -41,7 +43,13 @@ def parse_issue(body: str) -> dict:
     m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", body.split(MARKER, 1)[1], re.DOTALL)
     if not m:
         raise ValueError("이슈 본문에서 예매 계획을 찾지 못했어요")
-    data = json.loads(m.group(1))
+    return validate_change(json.loads(m.group(1)))
+
+
+def validate_change(data: dict) -> dict:
+    """웹페이지가 보낸 예매 계획 변경을 검사한다. 형식이 틀리면 ValueError."""
+    if not isinstance(data, dict):
+        raise ValueError("변경 내용이 올바르지 않아요")
     action, key = data.get("action"), data.get("key")
     if action not in ("set", "delete"):
         raise ValueError(f"알 수 없는 동작: {action!r}")
@@ -72,10 +80,52 @@ def apply(picks: dict, change: dict) -> str:
     """변경을 picks에 반영하고 결과를 한 줄로 돌려준다."""
     key = change["key"]
     if change["action"] == "delete":
-        removed = picks.pop(key, None)
-        return f"예매 계획을 취소했어요: {(removed or {}).get('artist') or key}"
+        # 지우지 않고 꺼둔다. 그래야 자동 리마인더가 같은 공연을 다시 넣지 않는다.
+        rec = picks.get(key) or {}
+        picks[key] = {**rec, "mode": "off"}
+        return f"예매 계획을 취소했어요: {rec.get('artist') or key}"
     pick = dict(change["pick"])
     pick["picked_at"] = (picks.get(key) or {}).get("picked_at") or pick["picked_at"]
     picks[key] = pick
     when = "공식 발표에서 자동으로 찾기" if pick["mode"] == "auto" else f"직접 입력 {pick['open_at']}"
     return f"예매 계획을 저장했어요: {pick['artist']} {pick['title']} ({when})"
+
+
+def active(picks: dict) -> dict:
+    """취소(off)하지 않은 예매 계획."""
+    return {k: p for k, p in picks.items() if (p or {}).get("mode") != "off"}
+
+
+def auto_add(picks: dict, state: dict, cfg: dict, now: dt.datetime) -> list[str]:
+    """예매 오픈 시각이 나온 공연을 예매 계획에 자동으로 넣는다(config reminders.auto).
+
+    이미 있는 계획(취소한 것 포함)은 건드리지 않는다. 추가한 공연 키 목록을 돌려준다.
+    """
+    rcfg = cfg.get("reminders") or {}
+    if not rcfg.get("auto", True):
+        return []
+    countries = {c.upper() for c in rcfg.get("auto_countries", ["KR"]) or []}
+    tracked = {a["name"] for a in cfg.get("artists") or []}
+    added = []
+    for key, e in (state.get("events") or {}).items():
+        if key in picks or e.get("artist") not in tracked:
+            continue
+        if countries and (e.get("country") or "").upper() not in countries:
+            continue
+        future = []
+        for c in e.get("sale_times") or []:
+            try:
+                if dt.datetime.fromisoformat(c["at"].replace("Z", "+00:00")) > now:
+                    future.append(c)
+            except (KeyError, ValueError):
+                pass
+        if not future:
+            continue
+        links = [l.get("url", "") for l in e.get("ticket_links") or [] if l.get("url", "").startswith("http")]
+        picks[key] = {
+            "artist": e.get("artist", ""), "title": e.get("title", ""), "anchor": e.get("anchor") or anchor_id(key),
+            "country": e.get("country", ""), "start": e.get("start", ""), "mode": "auto", "open_at": "",
+            "link": (links or [e.get("url", "")])[0], "picked_at": now.isoformat(timespec="seconds"), "auto": True,
+        }
+        added.append(key)
+    return added

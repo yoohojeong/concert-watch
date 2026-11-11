@@ -19,7 +19,7 @@ from zoneinfo import ZoneInfo
 
 import yaml
 
-from concert_watch import notify, official, opentimes, picks as picks_store, reminders, site, sources
+from concert_watch import notify, official, opentimes, picks as picks_store, reminders, remote, site, sources
 
 ROOT = Path(__file__).resolve().parent
 log = logging.getLogger("concert-watch")
@@ -195,6 +195,22 @@ def sample_event(today: dt.date) -> dict:
     }
 
 
+def apply_remote_edits(cfg: dict, state: dict, all_picks: dict) -> bool:
+    """웹페이지에서 비밀문구로 보낸 예매 계획 변경(ntfy)을 반영한다. 바뀐 게 있으면 True."""
+    site_cfg = cfg.get("site") or {}
+    passphrase = os.environ.get("PICK_PASSPHRASE")
+    topic = site_cfg.get("edit_topic")
+    repo = os.environ.get("GITHUB_REPOSITORY") or site_cfg.get("repo", "")
+    if not (passphrase and topic and repo):
+        return False
+    try:
+        return bool(remote.apply_remote(all_picks, state, passphrase, repo,
+                                        site_cfg.get("ntfy_server") or "https://ntfy.sh", topic))
+    except Exception as e:
+        log.error("웹페이지에서 보낸 예매 계획 변경을 읽지 못했어요: %s", e)
+        return False
+
+
 def _write_output(name: str, value: str) -> None:
     """GitHub Actions 단계 출력(이슈 댓글에 쓴다)."""
     out = os.environ.get("GITHUB_OUTPUT")
@@ -234,9 +250,13 @@ def main() -> int:
             return 1
         log.info(result)
         _write_output("result", result)
-    picks = load_picks(picks_path)
+    all_picks = load_picks(picks_path)
+    picks_changed = apply_remote_edits(cfg, state, all_picks)
 
     if args.reminders_only or args.apply_issue:
+        if picks_changed:
+            picks_store.save(picks_path, all_picks)
+        picks = picks_store.active(all_picks)
         reminders.process(cfg, picks, state, now, dry_run=args.dry_run)
         save_state(state_path, state)
         site.render(state, cfg, now, ROOT / "docs", picks=picks)
@@ -261,6 +281,12 @@ def main() -> int:
               if e["source"] == "kopis" else None) if kopis_key else None
 
     run(cfg, state, now, events, errors, news=news, dry_run=args.dry_run, enrich=enrich, hourly_events=melon)
+    added = picks_store.auto_add(all_picks, state, cfg, now)
+    if added:
+        log.info("예매 오픈 시각이 나온 공연 %d건을 예매 계획에 자동으로 넣었어요: %s", len(added), ", ".join(added))
+    if picks_changed or added:
+        picks_store.save(picks_path, all_picks)
+    picks = picks_store.active(all_picks)
     reminders.process(cfg, picks, state, now, dry_run=args.dry_run)
     state["last_errors"] = (state.get("last_api_errors") or []) + news_errors
     save_state(state_path, state)
