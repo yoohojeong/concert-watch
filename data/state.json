@@ -189,10 +189,14 @@
     }
   },
   "instagram_seen": {},
-  "last_api_check": "2026-11-12T19:22:44+09:00",
-  "last_api_errors": [],
-  "last_checked": "2026-11-12T22:10:29+09:00",
-  "last_errors": [],
+  "last_api_check": "2026-11-12T23:06:02+09:00",
+  "last_api_errors": [
+    "KOPIS(SourceError)"
+  ],
+  "last_checked": "2026-11-12T23:06:02+09:00",
+  "last_errors": [
+    "KOPIS(SourceError)"
+  ],
   "melon_last_id": 13271,
   "page_seen": {
     "http://www.hyukoh.com/": [
