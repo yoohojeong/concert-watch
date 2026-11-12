@@ -191,8 +191,10 @@
   "instagram_seen": {},
   "last_api_check": "2026-11-13T02:48:22+09:00",
   "last_api_errors": [],
-  "last_checked": "2026-11-13T03:44:40+09:00",
-  "last_errors": [],
+  "last_checked": "2026-11-13T04:40:00+09:00",
+  "last_errors": [
+    "멜론티켓(HTTPError)"
+  ],
   "melon_last_id": 13271,
   "page_seen": {
     "http://www.hyukoh.com/": [
