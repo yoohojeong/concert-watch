@@ -189,9 +189,9 @@
     }
   },
   "instagram_seen": {},
-  "last_api_check": "2026-11-13T06:30:51+09:00",
+  "last_api_check": "2026-11-13T10:12:50+09:00",
   "last_api_errors": [],
-  "last_checked": "2026-11-13T09:17:29+09:00",
+  "last_checked": "2026-11-13T10:12:50+09:00",
   "last_errors": [],
   "melon_last_id": 13271,
   "page_seen": {
@@ -541,6 +541,7 @@
     18835,
     18836,
     18837,
-    18838
+    18838,
+    18839
   ]
 }
