@@ -12,6 +12,27 @@
     "melon:13227|일반 예매|2026-11-12T11:00": "2026-11-12T01:54:49+09:00"
   },
   "events": {
+    "kopis:PF306428": {
+      "artist": "혁오",
+      "city": "서울특별시",
+      "country": "KR",
+      "end": "2027-01-17",
+      "first_seen": "2026-11-13T21:19:31+09:00",
+      "key": "kopis:PF306428",
+      "sale_start": "",
+      "source": "kopis",
+      "start": "2027-01-16",
+      "ticket_links": [
+        {
+          "name": "멜론티켓",
+          "url": "https://ticket.melon.com/performance/index.htm?prodId=214266"
+        }
+      ],
+      "time": "토요일(18:00), 일요일(17:00)",
+      "title": "HYUKOH 33 TOUR [서울]",
+      "url": "https://www.kopis.or.kr/por/db/pblprfr/pblprfrView.do?menuId=MNU_00020&mt20Id=PF306428",
+      "venue": "올림픽공원"
+    },
     "melon:13227": {
       "artist": "혁오",
       "city": "",
@@ -189,12 +210,10 @@
     }
   },
   "instagram_seen": {},
-  "last_api_check": "2026-11-13T17:37:10+09:00",
+  "last_api_check": "2026-11-13T21:19:31+09:00",
   "last_api_errors": [],
-  "last_checked": "2026-11-13T20:24:03+09:00",
-  "last_errors": [
-    "멜론티켓(HTTPError)"
-  ],
+  "last_checked": "2026-11-13T21:19:31+09:00",
+  "last_errors": [],
   "melon_last_id": 13281,
   "page_seen": {
     "http://www.hyukoh.com/": [
