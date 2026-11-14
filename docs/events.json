@@ -1,26 +1,26 @@
 {
-  "updated": "2026-11-14T21:34:43+09:00",
+  "updated": "2026-11-14T22:29:54+09:00",
   "events": [
     {
+      "key": "kopis:PF306428",
+      "source": "kopis",
       "artist": "혁오",
+      "title": "HYUKOH 33 TOUR [서울]",
+      "start": "2027-01-16",
+      "end": "2027-01-17",
+      "time": "토요일(18:00), 일요일(17:00)",
+      "venue": "올림픽공원",
       "city": "서울특별시",
       "country": "KR",
-      "end": "2027-01-17",
-      "first_seen": "2026-11-13T21:19:31+09:00",
-      "key": "kopis:PF306428",
-      "sale_start": "",
-      "source": "kopis",
-      "start": "2027-01-16",
+      "url": "https://www.kopis.or.kr/por/db/pblprfr/pblprfrView.do?menuId=MNU_00020&mt20Id=PF306428",
       "ticket_links": [
         {
           "name": "멜론티켓",
           "url": "https://ticket.melon.com/performance/index.htm?prodId=214266"
         }
       ],
-      "time": "토요일(18:00), 일요일(17:00)",
-      "title": "HYUKOH 33 TOUR [서울]",
-      "url": "https://www.kopis.or.kr/por/db/pblprfr/pblprfrView.do?menuId=MNU_00020&mt20Id=PF306428",
-      "venue": "올림픽공원"
+      "sale_start": "",
+      "first_seen": "2026-11-13T21:19:31+09:00"
     },
     {
       "artist": "혁오",
@@ -128,74 +128,74 @@
       "venue": "SoFi Stadium"
     },
     {
+      "key": "tm:1AvZZ_4GkDeDQk4",
+      "source": "ticketmaster",
       "artist": "혁오",
+      "title": "HYUKOH [33] TOUR",
+      "start": "2027-04-07",
+      "end": "2027-04-07",
+      "time": "19:00",
+      "venue": "The Danforth Music Hall",
       "city": "Toronto",
       "country": "CA",
-      "end": "2027-04-07",
-      "first_seen": "2026-11-12T00:37:09+09:00",
-      "key": "tm:1AvZZ_4GkDeDQk4",
-      "sale_start": "2026-11-12T15:00:00Z",
-      "sale_times": [
-        {
-          "at": "2026-11-10T15:00:00Z",
-          "label": "선예매(LIVE NATION PRESALE)"
-        },
-        {
-          "at": "2026-11-12T15:00:00Z",
-          "label": "일반 예매"
-        }
-      ],
-      "source": "ticketmaster",
-      "start": "2027-04-07",
+      "url": "https://www.ticketmaster.ca/hyukoh-33-tour-toronto-ontario-04-07-2027/event/1000655EC2EDA195",
       "ticket_links": [
         {
           "name": "Ticketmaster",
           "url": "https://www.ticketmaster.ca/hyukoh-33-tour-toronto-ontario-04-07-2027/event/1000655EC2EDA195"
         }
       ],
-      "time": "19:00",
-      "title": "HYUKOH [33] TOUR",
-      "url": "https://www.ticketmaster.ca/hyukoh-33-tour-toronto-ontario-04-07-2027/event/1000655EC2EDA195",
-      "venue": "The Danforth Music Hall"
-    },
-    {
-      "artist": "혁오",
-      "city": "Brooklyn",
-      "country": "US",
-      "end": "2027-04-09",
-      "first_seen": "2026-11-12T00:37:09+09:00",
-      "key": "tm:k7vGF_pF1pwN0",
       "sale_start": "2026-11-12T15:00:00Z",
       "sale_times": [
         {
-          "at": "2026-11-10T17:00:00Z",
-          "label": "선예매(LIVE NATION PRESALE)"
+          "label": "선예매(LIVE NATION PRESALE)",
+          "at": "2026-11-10T15:00:00Z"
         },
         {
-          "at": "2026-11-10T17:00:00Z",
-          "label": "선예매(Citi® Cardmember Presale)"
-        },
-        {
-          "at": "2026-11-12T15:00:00Z",
-          "label": "선예매(Citi® Cardmember Preferred)"
-        },
-        {
-          "at": "2026-11-12T15:00:00Z",
-          "label": "일반 예매"
+          "label": "일반 예매",
+          "at": "2026-11-12T15:00:00Z"
         }
       ],
+      "first_seen": "2026-11-12T00:37:09+09:00"
+    },
+    {
+      "key": "tm:k7vGF_pF1pwN0",
       "source": "ticketmaster",
+      "artist": "혁오",
+      "title": "Hyukoh",
       "start": "2027-04-09",
+      "end": "2027-04-09",
+      "time": "19:00",
+      "venue": "Brooklyn Paramount",
+      "city": "Brooklyn",
+      "country": "US",
+      "url": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4",
       "ticket_links": [
         {
           "name": "Ticketmaster",
           "url": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4"
         }
       ],
-      "time": "19:00",
-      "title": "Hyukoh",
-      "url": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4",
-      "venue": "Brooklyn Paramount"
+      "sale_start": "2026-11-12T15:00:00Z",
+      "sale_times": [
+        {
+          "label": "선예매(LIVE NATION PRESALE)",
+          "at": "2026-11-10T17:00:00Z"
+        },
+        {
+          "label": "선예매(Citi® Cardmember Presale)",
+          "at": "2026-11-10T17:00:00Z"
+        },
+        {
+          "label": "선예매(Citi® Cardmember Preferred)",
+          "at": "2026-11-12T15:00:00Z"
+        },
+        {
+          "label": "일반 예매",
+          "at": "2026-11-12T15:00:00Z"
+        }
+      ],
+      "first_seen": "2026-11-12T00:37:09+09:00"
     }
   ]
 }
