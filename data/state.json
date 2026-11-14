@@ -212,9 +212,9 @@
   "instagram_seen": {},
   "last_api_check": "2026-11-14T19:38:42+09:00",
   "last_api_errors": [],
-  "last_checked": "2026-11-14T19:38:42+09:00",
+  "last_checked": "2026-11-14T20:35:35+09:00",
   "last_errors": [
-    "멜론티켓(HTTPError)"
+    "멜론티켓(ConnectionError)"
   ],
   "melon_last_id": 13281,
   "page_seen": {
