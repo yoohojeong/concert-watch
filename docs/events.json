@@ -1,6 +1,33 @@
 {
-  "updated": "2026-11-16T13:42:16+09:00",
+  "updated": "2026-11-16T14:37:46+09:00",
   "events": [
+    {
+      "key": "melon:13291",
+      "source": "melon",
+      "title": "2026 LUAMEL (루아멜) 연말 단독 공연 〈Journey : Oasis〉",
+      "start": "2026-12-05",
+      "end": "2026-12-06",
+      "time": "",
+      "venue": "연남스페이스",
+      "city": "",
+      "country": "KR",
+      "url": "https://ticket.melon.com/csoon/detail.htm?csoonId=13291",
+      "ticket_links": [
+        {
+          "name": "멜론티켓",
+          "url": "https://ticket.melon.com/performance/index.htm?prodId=214315"
+        }
+      ],
+      "sale_start": "2026-11-19T11:00:00+00:00",
+      "sale_times": [
+        {
+          "label": "일반 예매",
+          "at": "2026-11-19T11:00:00+00:00"
+        }
+      ],
+      "artist": "Oasis",
+      "first_seen": "2026-11-16T14:37:46+09:00"
+    },
     {
       "artist": "혁오",
       "city": "서울특별시",

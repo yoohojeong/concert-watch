@@ -9,7 +9,8 @@
     "혁오"
   ],
   "auto_found": {
-    "melon:13227|일반 예매|2026-11-12T11:00": "2026-11-12T01:54:49+09:00"
+    "melon:13227|일반 예매|2026-11-12T11:00": "2026-11-12T01:54:49+09:00",
+    "melon:13291|일반 예매|2026-11-19T11:00": "2026-11-16T14:37:46+09:00"
   },
   "events": {
     "kopis:PF306428": {
@@ -59,6 +60,33 @@
       "title": "HYUKOH [33] TOUR - SEOUL",
       "url": "https://ticket.melon.com/csoon/detail.htm?csoonId=13227",
       "venue": "올림픽공원 올림픽홀"
+    },
+    "melon:13291": {
+      "artist": "Oasis",
+      "city": "",
+      "country": "KR",
+      "end": "2026-12-06",
+      "first_seen": "2026-11-16T14:37:46+09:00",
+      "key": "melon:13291",
+      "sale_start": "2026-11-19T11:00:00+00:00",
+      "sale_times": [
+        {
+          "at": "2026-11-19T11:00:00+00:00",
+          "label": "일반 예매"
+        }
+      ],
+      "source": "melon",
+      "start": "2026-12-05",
+      "ticket_links": [
+        {
+          "name": "멜론티켓",
+          "url": "https://ticket.melon.com/performance/index.htm?prodId=214315"
+        }
+      ],
+      "time": "",
+      "title": "2026 LUAMEL (루아멜) 연말 단독 공연 〈Journey : Oasis〉",
+      "url": "https://ticket.melon.com/csoon/detail.htm?csoonId=13291",
+      "venue": "연남스페이스"
     },
     "tm:1AvZZ_4GkDeDQk4": {
       "artist": "혁오",
@@ -212,11 +240,9 @@
   "instagram_seen": {},
   "last_api_check": "2026-11-16T12:45:57+09:00",
   "last_api_errors": [],
-  "last_checked": "2026-11-16T13:42:16+09:00",
-  "last_errors": [
-    "멜론티켓(HTTPError)"
-  ],
-  "melon_last_id": 13288,
+  "last_checked": "2026-11-16T14:37:46+09:00",
+  "last_errors": [],
+  "melon_last_id": 13294,
   "page_seen": {
     "http://www.hyukoh.com/": [
       "97bc3b1d068d8ed4",
@@ -498,6 +524,12 @@
       "mail": "none",
       "open_at": "2026-11-12T11:00:00+00:00",
       "push": "sent"
+    },
+    "melon:13291|10min|일반 예매|2026-11-19T11:00:00+00:00": {
+      "open_at": "2026-11-19T11:00:00+00:00"
+    },
+    "melon:13291|day|일반 예매|2026-11-19T11:00:00+00:00": {
+      "open_at": "2026-11-19T11:00:00+00:00"
     }
   },
   "remote_nonces": [
@@ -572,6 +604,7 @@
     18843,
     18844,
     18845,
-    18846
+    18846,
+    18848
   ]
 }
