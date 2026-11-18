@@ -240,9 +240,9 @@
   "instagram_seen": {},
   "last_api_check": "2026-11-18T17:23:27+09:00",
   "last_api_errors": [],
-  "last_checked": "2026-11-18T19:15:35+09:00",
+  "last_checked": "2026-11-18T20:11:15+09:00",
   "last_errors": [
-    "멜론티켓(ConnectTimeout)"
+    "멜론티켓(HTTPError)"
   ],
   "melon_last_id": 13323,
   "page_seen": {
@@ -528,9 +528,11 @@
       "push": "sent"
     },
     "melon:13291|10min|일반 예매|2026-11-19T11:00:00+00:00": {
-      "open_at": "2026-11-19T11:00:00+00:00"
+      "open_at": "2026-11-19T11:00:00+00:00",
+      "push": "scheduled"
     },
     "melon:13291|day|일반 예매|2026-11-19T11:00:00+00:00": {
+      "mail": "none",
       "open_at": "2026-11-19T11:00:00+00:00",
       "push": "scheduled"
     }
