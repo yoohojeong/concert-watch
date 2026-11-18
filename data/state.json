@@ -240,9 +240,9 @@
   "instagram_seen": {},
   "last_api_check": "2026-11-18T17:23:27+09:00",
   "last_api_errors": [],
-  "last_checked": "2026-11-18T17:23:27+09:00",
+  "last_checked": "2026-11-18T18:19:44+09:00",
   "last_errors": [],
-  "melon_last_id": 13319,
+  "melon_last_id": 13323,
   "page_seen": {
     "http://www.hyukoh.com/": [
       "97bc3b1d068d8ed4",
@@ -624,6 +624,7 @@
     18862,
     18863,
     18864,
-    18865
+    18865,
+    18867
   ]
 }
