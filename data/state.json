@@ -240,7 +240,7 @@
   "instagram_seen": {},
   "last_api_check": "2026-11-19T18:39:25+09:00",
   "last_api_errors": [],
-  "last_checked": "2026-11-19T19:35:40+09:00",
+  "last_checked": "2026-11-19T20:31:05+09:00",
   "last_errors": [],
   "melon_last_id": 13330,
   "page_seen": {
@@ -516,15 +516,6 @@
     ]
   },
   "reminders": {
-    "melon:13227|10min|일반 예매|2026-11-12T11:00:00+00:00": {
-      "open_at": "2026-11-12T11:00:00+00:00",
-      "push": "scheduled"
-    },
-    "melon:13227|day|일반 예매|2026-11-12T11:00:00+00:00": {
-      "mail": "none",
-      "open_at": "2026-11-12T11:00:00+00:00",
-      "push": "sent"
-    },
     "melon:13291|10min|일반 예매|2026-11-19T11:00:00+00:00": {
       "open_at": "2026-11-19T11:00:00+00:00",
       "push": "scheduled"
