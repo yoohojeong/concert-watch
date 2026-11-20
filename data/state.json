@@ -34,6 +34,27 @@
       "url": "https://www.kopis.or.kr/por/db/pblprfr/pblprfrView.do?menuId=MNU_00020&mt20Id=PF306428",
       "venue": "올림픽공원"
     },
+    "kopis:PF307093": {
+      "artist": "Oasis",
+      "city": "서울특별시",
+      "country": "KR",
+      "end": "2026-12-06",
+      "first_seen": "2026-11-20T17:03:35+09:00",
+      "key": "kopis:PF307093",
+      "sale_start": "",
+      "source": "kopis",
+      "start": "2026-12-05",
+      "ticket_links": [
+        {
+          "name": "멜론티켓",
+          "url": "https://ticket.melon.com/performance/index.htm?prodId=214315"
+        }
+      ],
+      "time": "토요일(18:00), 일요일(17:00)",
+      "title": "루아멜 연말 단독 공연, Journey: Oasis",
+      "url": "https://www.kopis.or.kr/por/db/pblprfr/pblprfrView.do?menuId=MNU_00020&mt20Id=PF307093",
+      "venue": "연남스페이스"
+    },
     "melon:13227": {
       "artist": "혁오",
       "city": "",
@@ -238,11 +259,11 @@
     }
   },
   "instagram_seen": {},
-  "last_api_check": "2026-11-20T13:19:57+09:00",
+  "last_api_check": "2026-11-20T17:03:35+09:00",
   "last_api_errors": [],
-  "last_checked": "2026-11-20T16:08:17+09:00",
+  "last_checked": "2026-11-20T17:03:35+09:00",
   "last_errors": [
-    "멜론티켓(HTTPError)"
+    "공식 사이트 http://www.hyukoh.com/(SourceError)"
   ],
   "melon_last_id": 13340,
   "page_seen": {
@@ -630,6 +651,7 @@
     18872,
     18873,
     18874,
-    18875
+    18875,
+    18876
   ]
 }
