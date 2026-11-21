@@ -320,7 +320,7 @@
   "instagram_seen": {},
   "last_api_check": "2026-11-22T02:32:36+09:00",
   "last_api_errors": [],
-  "last_checked": "2026-11-22T04:23:44+09:00",
+  "last_checked": "2026-11-22T05:18:54+09:00",
   "last_errors": [
     "공식 사이트 http://www.hyukoh.com/(SourceError)"
   ],
@@ -335,6 +335,7 @@
       "538b3d9298796a8e"
     ],
     "https://oasisinet.com/": [
+      "436c08137919ba2f",
       "34c808d0a63f277e",
       "55de88709232ec03",
       "7a5ee4290bc9fc5b",
