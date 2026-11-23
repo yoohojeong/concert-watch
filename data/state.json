@@ -168,6 +168,65 @@
       "url": "https://www.ticketmaster.co.uk/oasis-live-27-glasgow-21-05-2027/event/3500652A88FE1835",
       "venue": "Celtic Park"
     },
+    "tm:1AgZkfwGkd1ybNO": {
+      "artist": "Oasis",
+      "city": "Glasgow",
+      "country": "GB",
+      "end": "2027-05-23",
+      "first_seen": "2026-11-24T02:57:37+09:00",
+      "key": "tm:1AgZkfwGkd1ybNO",
+      "sale_start": "",
+      "sale_times": [
+        {
+          "at": "2026-09-25T08:00:00Z",
+          "label": "선예매(Friday 09:00 Onsale)"
+        },
+        {
+          "at": "2026-09-25T12:00:00Z",
+          "label": "선예매(Friday 13:00 Onsale)"
+        },
+        {
+          "at": "2026-09-25T16:00:00Z",
+          "label": "선예매(Friday 17:00 Onsale)"
+        },
+        {
+          "at": "2026-09-26T08:00:00Z",
+          "label": "선예매(Saturday 09:00 Onsale)"
+        },
+        {
+          "at": "2026-09-26T12:00:00Z",
+          "label": "선예매(Saturday 13:00 Onsale)"
+        },
+        {
+          "at": "2026-09-26T16:00:00Z",
+          "label": "선예매(Saturday 17:00 Onsale)"
+        },
+        {
+          "at": "2026-09-27T08:00:00Z",
+          "label": "선예매(Sunday 09:00 Onsale)"
+        },
+        {
+          "at": "2026-09-27T12:00:00Z",
+          "label": "선예매(Sunday 13:00 Onsale)"
+        },
+        {
+          "at": "2026-09-27T16:00:00Z",
+          "label": "선예매(Sunday 17:00 Onsale)"
+        }
+      ],
+      "source": "ticketmaster",
+      "start": "2027-05-23",
+      "ticket_links": [
+        {
+          "name": "Ticketmaster",
+          "url": "https://www.ticketmaster.co.uk/oasis-live-27-glasgow-23-05-2027/event/35006532CAE588E0"
+        }
+      ],
+      "time": "17:00",
+      "title": "Oasis Live '27",
+      "url": "https://www.ticketmaster.co.uk/oasis-live-27-glasgow-23-05-2027/event/35006532CAE588E0",
+      "venue": "Celtic Park"
+    },
     "tm:1AvZZ_4GkDeDQk4": {
       "artist": "혁오",
       "city": "Toronto",
@@ -318,14 +377,15 @@
     }
   },
   "instagram_seen": {},
-  "last_api_check": "2026-11-23T23:13:30+09:00",
+  "last_api_check": "2026-11-24T02:57:37+09:00",
   "last_api_errors": [
     "KOPIS(ConnectTimeout)"
   ],
-  "last_checked": "2026-11-24T02:02:14+09:00",
+  "last_checked": "2026-11-24T02:57:37+09:00",
   "last_errors": [
     "KOPIS(ConnectTimeout)",
-    "공식 사이트 http://www.hyukoh.com/(SourceError)"
+    "공식 사이트 http://www.hyukoh.com/(SourceError)",
+    "멜론티켓(HTTPError)"
   ],
   "melon_last_id": 13355,
   "page_seen": {
