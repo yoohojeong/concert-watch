@@ -377,11 +377,11 @@
     }
   },
   "instagram_seen": {},
-  "last_api_check": "2026-11-24T05:47:43+09:00",
+  "last_api_check": "2026-11-24T09:32:04+09:00",
   "last_api_errors": [
     "KOPIS(ConnectTimeout)"
   ],
-  "last_checked": "2026-11-24T08:36:24+09:00",
+  "last_checked": "2026-11-24T09:32:04+09:00",
   "last_errors": [
     "KOPIS(ConnectTimeout)",
     "공식 사이트 http://www.hyukoh.com/(SourceError)"
