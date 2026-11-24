@@ -10,7 +10,8 @@
   ],
   "auto_found": {
     "melon:13227|일반 예매|2026-11-12T11:00": "2026-11-12T01:54:49+09:00",
-    "melon:13291|일반 예매|2026-11-19T11:00": "2026-11-16T14:37:46+09:00"
+    "melon:13291|일반 예매|2026-11-19T11:00": "2026-11-16T14:37:46+09:00",
+    "melon:13379|일반 예매|2026-12-01T11:00": "2026-11-24T21:40:24+09:00"
   },
   "events": {
     "kopis:PF306428": {
@@ -108,6 +109,33 @@
       "title": "2026 LUAMEL (루아멜) 연말 단독 공연 〈Journey : Oasis〉",
       "url": "https://ticket.melon.com/csoon/detail.htm?csoonId=13291",
       "venue": "연남스페이스"
+    },
+    "melon:13379": {
+      "artist": "혁오",
+      "city": "",
+      "country": "KR",
+      "end": "2027-01-17",
+      "first_seen": "2026-11-24T21:40:24+09:00",
+      "key": "melon:13379",
+      "sale_start": "2026-12-01T11:00:00+00:00",
+      "sale_times": [
+        {
+          "at": "2026-12-01T11:00:00+00:00",
+          "label": "일반 예매"
+        }
+      ],
+      "source": "melon",
+      "start": "2027-01-15",
+      "ticket_links": [
+        {
+          "name": "멜론티켓",
+          "url": "https://ticket.melon.com/performance/index.htm?prodId=214266"
+        }
+      ],
+      "time": "",
+      "title": "HYUKOH [33] TOUR - SEOUL 추가회차",
+      "url": "https://ticket.melon.com/csoon/detail.htm?csoonId=13379",
+      "venue": "올림픽공원 올림픽홀"
     },
     "tm:1AdfZ_3GknFT-Og": {
       "artist": "Oasis",
@@ -379,12 +407,11 @@
   "instagram_seen": {},
   "last_api_check": "2026-11-24T19:47:47+09:00",
   "last_api_errors": [],
-  "last_checked": "2026-11-24T20:44:25+09:00",
+  "last_checked": "2026-11-24T21:40:24+09:00",
   "last_errors": [
-    "공식 사이트 http://www.hyukoh.com/(SourceError)",
-    "멜론티켓(HTTPError)"
+    "공식 사이트 http://www.hyukoh.com/(SourceError)"
   ],
-  "melon_last_id": 13369,
+  "melon_last_id": 13380,
   "page_seen": {
     "http://www.hyukoh.com/": [
       "97bc3b1d068d8ed4",
@@ -667,6 +694,12 @@
       "mail": "none",
       "open_at": "2026-11-19T11:00:00+00:00",
       "push": "scheduled"
+    },
+    "melon:13379|10min|일반 예매|2026-12-01T11:00:00+00:00": {
+      "open_at": "2026-12-01T11:00:00+00:00"
+    },
+    "melon:13379|day|일반 예매|2026-12-01T11:00:00+00:00": {
+      "open_at": "2026-12-01T11:00:00+00:00"
     }
   },
   "remote_nonces": [

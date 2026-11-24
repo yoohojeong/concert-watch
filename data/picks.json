@@ -22,6 +22,18 @@
       "link": "https://ticket.melon.com/performance/index.htm?prodId=214315",
       "picked_at": "2026-11-16T14:37:46+09:00",
       "auto": true
+    },
+    "melon:13379": {
+      "artist": "혁오",
+      "title": "HYUKOH [33] TOUR - SEOUL 추가회차",
+      "anchor": "e-e8d7266648",
+      "country": "KR",
+      "start": "2027-01-15",
+      "mode": "auto",
+      "open_at": "",
+      "link": "https://ticket.melon.com/performance/index.htm?prodId=214266",
+      "picked_at": "2026-11-24T21:40:24+09:00",
+      "auto": true
     }
   }
 }
