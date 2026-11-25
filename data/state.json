@@ -255,6 +255,65 @@
       "url": "https://www.ticketmaster.co.uk/oasis-live-27-glasgow-23-05-2027/event/35006532CAE588E0",
       "venue": "Celtic Park"
     },
+    "tm:1AgZkfwGkd5KFPx": {
+      "artist": "Oasis",
+      "city": "Glasgow",
+      "country": "GB",
+      "end": "2027-05-25",
+      "first_seen": "2026-11-26T04:04:28+09:00",
+      "key": "tm:1AgZkfwGkd5KFPx",
+      "sale_start": "",
+      "sale_times": [
+        {
+          "at": "2026-09-25T08:00:00Z",
+          "label": "선예매(Friday 09:00 Onsale)"
+        },
+        {
+          "at": "2026-09-25T12:00:00Z",
+          "label": "선예매(Friday 13:00 Onsale)"
+        },
+        {
+          "at": "2026-09-25T16:00:00Z",
+          "label": "선예매(Friday 17:00 Onsale)"
+        },
+        {
+          "at": "2026-09-26T08:00:00Z",
+          "label": "선예매(Saturday 09:00 Onsale)"
+        },
+        {
+          "at": "2026-09-26T12:00:00Z",
+          "label": "선예매(Saturday 13:00 Onsale)"
+        },
+        {
+          "at": "2026-09-26T16:00:00Z",
+          "label": "선예매(Saturday 17:00 Onsale)"
+        },
+        {
+          "at": "2026-09-27T08:00:00Z",
+          "label": "선예매(Sunday 09:00 Onsale)"
+        },
+        {
+          "at": "2026-09-27T12:00:00Z",
+          "label": "선예매(Sunday 13:00 Onsale)"
+        },
+        {
+          "at": "2026-09-27T16:00:00Z",
+          "label": "선예매(Sunday 17:00 Onsale)"
+        }
+      ],
+      "source": "ticketmaster",
+      "start": "2027-05-25",
+      "ticket_links": [
+        {
+          "name": "Ticketmaster",
+          "url": "https://www.ticketmaster.co.uk/oasis-live-27-glasgow-25-05-2027/event/35006532CB4C8962"
+        }
+      ],
+      "time": "17:00",
+      "title": "Oasis Live '27",
+      "url": "https://www.ticketmaster.co.uk/oasis-live-27-glasgow-25-05-2027/event/35006532CB4C8962",
+      "venue": "Celtic Park"
+    },
     "tm:1AvZZ_4GkDeDQk4": {
       "artist": "혁오",
       "city": "Toronto",
@@ -285,6 +344,33 @@
       "title": "HYUKOH [33] TOUR",
       "url": "https://www.ticketmaster.ca/hyukoh-33-tour-toronto-ontario-04-07-2027/event/1000655EC2EDA195",
       "venue": "The Danforth Music Hall"
+    },
+    "tm:Z7r9jZ1AAAPu9": {
+      "artist": "혁오",
+      "city": "San Francisco",
+      "country": "US",
+      "end": "2027-03-29",
+      "first_seen": "2026-11-26T04:04:28+09:00",
+      "key": "tm:Z7r9jZ1AAAPu9",
+      "sale_start": "1900-01-01T18:00:00Z",
+      "sale_times": [
+        {
+          "at": "1900-01-01T18:00:00Z",
+          "label": "일반 예매"
+        }
+      ],
+      "source": "ticketmaster",
+      "start": "2027-03-29",
+      "ticket_links": [
+        {
+          "name": "Ticketmaster",
+          "url": "https://www.ticketmaster.com/event/Z7r9jZ1AAAPu9"
+        }
+      ],
+      "time": "20:00",
+      "title": "Hyukoh",
+      "url": "https://www.ticketmaster.com/event/Z7r9jZ1AAAPu9",
+      "venue": "The Regency Ballroom"
     },
     "tm:Z8ymWIMJlyZgcZ7aFd": {
       "artist": "빅뱅",
@@ -405,12 +491,14 @@
     }
   },
   "instagram_seen": {},
-  "last_api_check": "2026-11-25T21:54:55+09:00",
-  "last_api_errors": [],
-  "last_checked": "2026-11-26T00:42:35+09:00",
+  "last_api_check": "2026-11-26T04:04:28+09:00",
+  "last_api_errors": [
+    "KOPIS(ConnectTimeout)"
+  ],
+  "last_checked": "2026-11-26T04:04:28+09:00",
   "last_errors": [
-    "공식 사이트 http://www.hyukoh.com/(SourceError)",
-    "멜론티켓(HTTPError)"
+    "KOPIS(ConnectTimeout)",
+    "공식 사이트 http://www.hyukoh.com/(SourceError)"
   ],
   "melon_last_id": 13388,
   "page_seen": {
