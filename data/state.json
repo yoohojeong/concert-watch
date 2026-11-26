@@ -495,10 +495,11 @@
   "last_api_errors": [
     "KOPIS(ConnectTimeout)"
   ],
-  "last_checked": "2026-11-26T19:53:18+09:00",
+  "last_checked": "2026-11-26T20:49:07+09:00",
   "last_errors": [
     "KOPIS(ConnectTimeout)",
-    "공식 사이트 http://www.hyukoh.com/(SourceError)"
+    "공식 사이트 http://www.hyukoh.com/(SourceError)",
+    "멜론티켓(HTTPError)"
   ],
   "melon_last_id": 13403,
   "page_seen": {
@@ -788,15 +789,6 @@
     ]
   },
   "reminders": {
-    "melon:13291|10min|일반 예매|2026-11-19T11:00:00+00:00": {
-      "open_at": "2026-11-19T11:00:00+00:00",
-      "push": "scheduled"
-    },
-    "melon:13291|day|일반 예매|2026-11-19T11:00:00+00:00": {
-      "mail": "none",
-      "open_at": "2026-11-19T11:00:00+00:00",
-      "push": "scheduled"
-    },
     "melon:13379|10min|일반 예매|2026-12-01T11:00:00+00:00": {
       "open_at": "2026-12-01T11:00:00+00:00"
     },
