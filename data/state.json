@@ -495,12 +495,12 @@
   "last_api_errors": [
     "KOPIS(ConnectTimeout)"
   ],
-  "last_checked": "2026-11-27T17:23:36+09:00",
+  "last_checked": "2026-11-27T18:18:53+09:00",
   "last_errors": [
     "KOPIS(ConnectTimeout)",
     "공식 사이트 http://www.hyukoh.com/(SourceError)"
   ],
-  "melon_last_id": 13411,
+  "melon_last_id": 13413,
   "page_seen": {
     "http://www.hyukoh.com/": [
       "0a4470d64e9d3259",
