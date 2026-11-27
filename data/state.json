@@ -491,11 +491,11 @@
     }
   },
   "instagram_seen": {},
-  "last_api_check": "2026-11-27T11:48:09+09:00",
+  "last_api_check": "2026-11-27T15:30:56+09:00",
   "last_api_errors": [
     "KOPIS(ConnectTimeout)"
   ],
-  "last_checked": "2026-11-27T14:35:40+09:00",
+  "last_checked": "2026-11-27T15:30:56+09:00",
   "last_errors": [
     "KOPIS(ConnectTimeout)",
     "공식 사이트 http://www.hyukoh.com/(SourceError)"
