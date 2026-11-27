@@ -495,10 +495,11 @@
   "last_api_errors": [
     "KOPIS(ConnectTimeout)"
   ],
-  "last_checked": "2026-11-27T15:30:56+09:00",
+  "last_checked": "2026-11-27T16:27:35+09:00",
   "last_errors": [
     "KOPIS(ConnectTimeout)",
-    "공식 사이트 http://www.hyukoh.com/(SourceError)"
+    "공식 사이트 http://www.hyukoh.com/(SourceError)",
+    "멜론티켓(HTTPError)"
   ],
   "melon_last_id": 13411,
   "page_seen": {
