@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-28T10:05:06+09:00",
+  "updated": "2026-11-28T11:00:57+09:00",
   "events": [
     {
       "artist": "Oasis",
@@ -29,46 +29,46 @@
       "venue": "연남스페이스"
     },
     {
-      "key": "kopis:PF307093",
-      "source": "kopis",
       "artist": "Oasis",
-      "title": "루아멜 연말 단독 공연, Journey: Oasis",
-      "start": "2026-12-05",
-      "end": "2026-12-06",
-      "time": "토요일(18:00), 일요일(17:00)",
-      "venue": "연남스페이스",
       "city": "서울특별시",
       "country": "KR",
-      "url": "https://www.kopis.or.kr/por/db/pblprfr/pblprfrView.do?menuId=MNU_00020&mt20Id=PF307093",
+      "end": "2026-12-06",
+      "first_seen": "2026-11-20T17:03:35+09:00",
+      "key": "kopis:PF307093",
+      "sale_start": "",
+      "source": "kopis",
+      "start": "2026-12-05",
       "ticket_links": [
         {
           "name": "멜론티켓",
           "url": "https://ticket.melon.com/performance/index.htm?prodId=214315"
         }
       ],
-      "sale_start": "",
-      "first_seen": "2026-11-20T17:03:35+09:00"
+      "time": "토요일(18:00), 일요일(17:00)",
+      "title": "루아멜 연말 단독 공연, Journey: Oasis",
+      "url": "https://www.kopis.or.kr/por/db/pblprfr/pblprfrView.do?menuId=MNU_00020&mt20Id=PF307093",
+      "venue": "연남스페이스"
     },
     {
-      "key": "kopis:PF306428",
-      "source": "kopis",
       "artist": "혁오",
-      "title": "HYUKOH 33 TOUR [서울]",
-      "start": "2027-01-15",
-      "end": "2027-01-17",
-      "time": "토요일(18:00), 일요일(17:00)",
-      "venue": "올림픽공원",
       "city": "서울특별시",
       "country": "KR",
-      "url": "https://www.kopis.or.kr/por/db/pblprfr/pblprfrView.do?menuId=MNU_00020&mt20Id=PF306428",
+      "end": "2027-01-17",
+      "first_seen": "2026-11-13T21:19:31+09:00",
+      "key": "kopis:PF306428",
+      "sale_start": "",
+      "source": "kopis",
+      "start": "2027-01-15",
       "ticket_links": [
         {
           "name": "멜론티켓",
           "url": "https://ticket.melon.com/performance/index.htm?prodId=214266"
         }
       ],
-      "sale_start": "",
-      "first_seen": "2026-11-13T21:19:31+09:00"
+      "time": "토요일(18:00), 일요일(17:00)",
+      "title": "HYUKOH 33 TOUR [서울]",
+      "url": "https://www.kopis.or.kr/por/db/pblprfr/pblprfrView.do?menuId=MNU_00020&mt20Id=PF306428",
+      "venue": "올림픽공원"
     },
     {
       "artist": "혁오",
@@ -203,278 +203,278 @@
       "venue": "SoFi Stadium"
     },
     {
-      "key": "tm:Z7r9jZ1AAAPu9",
-      "source": "ticketmaster",
       "artist": "혁오",
-      "title": "Hyukoh",
-      "start": "2027-03-29",
-      "end": "2027-03-29",
-      "time": "20:00",
-      "venue": "The Regency Ballroom",
       "city": "San Francisco",
       "country": "US",
-      "url": "https://www.ticketmaster.com/event/Z7r9jZ1AAAPu9",
+      "end": "2027-03-29",
+      "first_seen": "2026-11-26T04:04:28+09:00",
+      "key": "tm:Z7r9jZ1AAAPu9",
+      "sale_start": "1900-01-01T18:00:00Z",
+      "sale_times": [
+        {
+          "at": "1900-01-01T18:00:00Z",
+          "label": "일반 예매"
+        }
+      ],
+      "source": "ticketmaster",
+      "start": "2027-03-29",
       "ticket_links": [
         {
           "name": "Ticketmaster",
           "url": "https://www.ticketmaster.com/event/Z7r9jZ1AAAPu9"
         }
       ],
-      "sale_start": "1900-01-01T18:00:00Z",
-      "sale_times": [
-        {
-          "label": "일반 예매",
-          "at": "1900-01-01T18:00:00Z"
-        }
-      ],
-      "first_seen": "2026-11-26T04:04:28+09:00"
+      "time": "20:00",
+      "title": "Hyukoh",
+      "url": "https://www.ticketmaster.com/event/Z7r9jZ1AAAPu9",
+      "venue": "The Regency Ballroom"
     },
     {
-      "key": "tm:1AvZZ_4GkDeDQk4",
-      "source": "ticketmaster",
       "artist": "혁오",
-      "title": "HYUKOH [33] TOUR",
-      "start": "2027-04-07",
-      "end": "2027-04-07",
-      "time": "19:00",
-      "venue": "The Danforth Music Hall",
       "city": "Toronto",
       "country": "CA",
-      "url": "https://www.ticketmaster.ca/hyukoh-33-tour-toronto-ontario-04-07-2027/event/1000655EC2EDA195",
+      "end": "2027-04-07",
+      "first_seen": "2026-11-12T00:37:09+09:00",
+      "key": "tm:1AvZZ_4GkDeDQk4",
+      "sale_start": "2026-11-12T15:00:00Z",
+      "sale_times": [
+        {
+          "at": "2026-11-10T15:00:00Z",
+          "label": "선예매(LIVE NATION PRESALE)"
+        },
+        {
+          "at": "2026-11-12T15:00:00Z",
+          "label": "일반 예매"
+        }
+      ],
+      "source": "ticketmaster",
+      "start": "2027-04-07",
       "ticket_links": [
         {
           "name": "Ticketmaster",
           "url": "https://www.ticketmaster.ca/hyukoh-33-tour-toronto-ontario-04-07-2027/event/1000655EC2EDA195"
         }
       ],
+      "time": "19:00",
+      "title": "HYUKOH [33] TOUR",
+      "url": "https://www.ticketmaster.ca/hyukoh-33-tour-toronto-ontario-04-07-2027/event/1000655EC2EDA195",
+      "venue": "The Danforth Music Hall"
+    },
+    {
+      "artist": "혁오",
+      "city": "Brooklyn",
+      "country": "US",
+      "end": "2027-04-09",
+      "first_seen": "2026-11-12T00:37:09+09:00",
+      "key": "tm:k7vGF_pF1pwN0",
       "sale_start": "2026-11-12T15:00:00Z",
       "sale_times": [
         {
-          "label": "선예매(LIVE NATION PRESALE)",
-          "at": "2026-11-10T15:00:00Z"
+          "at": "2026-11-10T17:00:00Z",
+          "label": "선예매(LIVE NATION PRESALE)"
         },
         {
-          "label": "일반 예매",
-          "at": "2026-11-12T15:00:00Z"
+          "at": "2026-11-10T17:00:00Z",
+          "label": "선예매(Citi® Cardmember Presale)"
+        },
+        {
+          "at": "2026-11-12T15:00:00Z",
+          "label": "선예매(Citi® Cardmember Preferred)"
+        },
+        {
+          "at": "2026-11-12T15:00:00Z",
+          "label": "일반 예매"
         }
       ],
-      "first_seen": "2026-11-12T00:37:09+09:00"
-    },
-    {
-      "key": "tm:k7vGF_pF1pwN0",
       "source": "ticketmaster",
-      "artist": "혁오",
-      "title": "Hyukoh",
       "start": "2027-04-09",
-      "end": "2027-04-09",
-      "time": "19:00",
-      "venue": "Brooklyn Paramount",
-      "city": "Brooklyn",
-      "country": "US",
-      "url": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4",
       "ticket_links": [
         {
           "name": "Ticketmaster",
           "url": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4"
         }
       ],
-      "sale_start": "2026-11-12T15:00:00Z",
-      "sale_times": [
-        {
-          "label": "선예매(LIVE NATION PRESALE)",
-          "at": "2026-11-10T17:00:00Z"
-        },
-        {
-          "label": "선예매(Citi® Cardmember Presale)",
-          "at": "2026-11-10T17:00:00Z"
-        },
-        {
-          "label": "선예매(Citi® Cardmember Preferred)",
-          "at": "2026-11-12T15:00:00Z"
-        },
-        {
-          "label": "일반 예매",
-          "at": "2026-11-12T15:00:00Z"
-        }
-      ],
-      "first_seen": "2026-11-12T00:37:09+09:00"
+      "time": "19:00",
+      "title": "Hyukoh",
+      "url": "https://www.ticketmaster.com/hyukoh-brooklyn-new-york-04-09-2027/event/000065620A5B28E4",
+      "venue": "Brooklyn Paramount"
     },
     {
-      "key": "tm:1AdfZ_3GknFT-Og",
-      "source": "ticketmaster",
       "artist": "Oasis",
-      "title": "Oasis Live '27",
-      "start": "2027-05-21",
-      "end": "2027-05-21",
-      "time": "17:00",
-      "venue": "Celtic Park",
       "city": "Glasgow",
       "country": "GB",
-      "url": "https://www.ticketmaster.co.uk/oasis-live-27-glasgow-21-05-2027/event/3500652A88FE1835",
+      "end": "2027-05-21",
+      "first_seen": "2026-11-22T02:32:36+09:00",
+      "key": "tm:1AdfZ_3GknFT-Og",
+      "sale_start": "",
+      "sale_times": [
+        {
+          "at": "2026-09-25T08:00:00Z",
+          "label": "선예매(Friday 09:00 Onsale)"
+        },
+        {
+          "at": "2026-09-25T12:00:00Z",
+          "label": "선예매(Friday 13:00 Onsale)"
+        },
+        {
+          "at": "2026-09-25T16:00:00Z",
+          "label": "선예매(Friday 17:00 Onsale)"
+        },
+        {
+          "at": "2026-09-26T08:00:00Z",
+          "label": "선예매(Saturday 09:00 Onsale)"
+        },
+        {
+          "at": "2026-09-26T12:00:00Z",
+          "label": "선예매(Saturday 13:00 Onsale)"
+        },
+        {
+          "at": "2026-09-26T16:00:00Z",
+          "label": "선예매(Saturday 17:00 Onsale)"
+        },
+        {
+          "at": "2026-09-27T08:00:00Z",
+          "label": "선예매(Sunday 09:00 Onsale)"
+        },
+        {
+          "at": "2026-09-27T12:00:00Z",
+          "label": "선예매(Sunday 13:00 Onsale)"
+        },
+        {
+          "at": "2026-09-27T16:00:00Z",
+          "label": "선예매(Sunday 17:00 Onsale)"
+        }
+      ],
+      "source": "ticketmaster",
+      "start": "2027-05-21",
       "ticket_links": [
         {
           "name": "Ticketmaster",
           "url": "https://www.ticketmaster.co.uk/oasis-live-27-glasgow-21-05-2027/event/3500652A88FE1835"
         }
       ],
+      "time": "17:00",
+      "title": "Oasis Live '27",
+      "url": "https://www.ticketmaster.co.uk/oasis-live-27-glasgow-21-05-2027/event/3500652A88FE1835",
+      "venue": "Celtic Park"
+    },
+    {
+      "artist": "Oasis",
+      "city": "Glasgow",
+      "country": "GB",
+      "end": "2027-05-23",
+      "first_seen": "2026-11-24T02:57:37+09:00",
+      "key": "tm:1AgZkfwGkd1ybNO",
       "sale_start": "",
       "sale_times": [
         {
-          "label": "선예매(Friday 09:00 Onsale)",
-          "at": "2026-09-25T08:00:00Z"
+          "at": "2026-09-25T08:00:00Z",
+          "label": "선예매(Friday 09:00 Onsale)"
         },
         {
-          "label": "선예매(Friday 13:00 Onsale)",
-          "at": "2026-09-25T12:00:00Z"
+          "at": "2026-09-25T12:00:00Z",
+          "label": "선예매(Friday 13:00 Onsale)"
         },
         {
-          "label": "선예매(Friday 17:00 Onsale)",
-          "at": "2026-09-25T16:00:00Z"
+          "at": "2026-09-25T16:00:00Z",
+          "label": "선예매(Friday 17:00 Onsale)"
         },
         {
-          "label": "선예매(Saturday 09:00 Onsale)",
-          "at": "2026-09-26T08:00:00Z"
+          "at": "2026-09-26T08:00:00Z",
+          "label": "선예매(Saturday 09:00 Onsale)"
         },
         {
-          "label": "선예매(Saturday 13:00 Onsale)",
-          "at": "2026-09-26T12:00:00Z"
+          "at": "2026-09-26T12:00:00Z",
+          "label": "선예매(Saturday 13:00 Onsale)"
         },
         {
-          "label": "선예매(Saturday 17:00 Onsale)",
-          "at": "2026-09-26T16:00:00Z"
+          "at": "2026-09-26T16:00:00Z",
+          "label": "선예매(Saturday 17:00 Onsale)"
         },
         {
-          "label": "선예매(Sunday 09:00 Onsale)",
-          "at": "2026-09-27T08:00:00Z"
+          "at": "2026-09-27T08:00:00Z",
+          "label": "선예매(Sunday 09:00 Onsale)"
         },
         {
-          "label": "선예매(Sunday 13:00 Onsale)",
-          "at": "2026-09-27T12:00:00Z"
+          "at": "2026-09-27T12:00:00Z",
+          "label": "선예매(Sunday 13:00 Onsale)"
         },
         {
-          "label": "선예매(Sunday 17:00 Onsale)",
-          "at": "2026-09-27T16:00:00Z"
+          "at": "2026-09-27T16:00:00Z",
+          "label": "선예매(Sunday 17:00 Onsale)"
         }
       ],
-      "first_seen": "2026-11-22T02:32:36+09:00"
-    },
-    {
-      "key": "tm:1AgZkfwGkd1ybNO",
       "source": "ticketmaster",
-      "artist": "Oasis",
-      "title": "Oasis Live '27",
       "start": "2027-05-23",
-      "end": "2027-05-23",
-      "time": "17:00",
-      "venue": "Celtic Park",
-      "city": "Glasgow",
-      "country": "GB",
-      "url": "https://www.ticketmaster.co.uk/oasis-live-27-glasgow-23-05-2027/event/35006532CAE588E0",
       "ticket_links": [
         {
           "name": "Ticketmaster",
           "url": "https://www.ticketmaster.co.uk/oasis-live-27-glasgow-23-05-2027/event/35006532CAE588E0"
         }
       ],
+      "time": "17:00",
+      "title": "Oasis Live '27",
+      "url": "https://www.ticketmaster.co.uk/oasis-live-27-glasgow-23-05-2027/event/35006532CAE588E0",
+      "venue": "Celtic Park"
+    },
+    {
+      "artist": "Oasis",
+      "city": "Glasgow",
+      "country": "GB",
+      "end": "2027-05-25",
+      "first_seen": "2026-11-26T04:04:28+09:00",
+      "key": "tm:1AgZkfwGkd5KFPx",
       "sale_start": "",
       "sale_times": [
         {
-          "label": "선예매(Friday 09:00 Onsale)",
-          "at": "2026-09-25T08:00:00Z"
+          "at": "2026-09-25T08:00:00Z",
+          "label": "선예매(Friday 09:00 Onsale)"
         },
         {
-          "label": "선예매(Friday 13:00 Onsale)",
-          "at": "2026-09-25T12:00:00Z"
+          "at": "2026-09-25T12:00:00Z",
+          "label": "선예매(Friday 13:00 Onsale)"
         },
         {
-          "label": "선예매(Friday 17:00 Onsale)",
-          "at": "2026-09-25T16:00:00Z"
+          "at": "2026-09-25T16:00:00Z",
+          "label": "선예매(Friday 17:00 Onsale)"
         },
         {
-          "label": "선예매(Saturday 09:00 Onsale)",
-          "at": "2026-09-26T08:00:00Z"
+          "at": "2026-09-26T08:00:00Z",
+          "label": "선예매(Saturday 09:00 Onsale)"
         },
         {
-          "label": "선예매(Saturday 13:00 Onsale)",
-          "at": "2026-09-26T12:00:00Z"
+          "at": "2026-09-26T12:00:00Z",
+          "label": "선예매(Saturday 13:00 Onsale)"
         },
         {
-          "label": "선예매(Saturday 17:00 Onsale)",
-          "at": "2026-09-26T16:00:00Z"
+          "at": "2026-09-26T16:00:00Z",
+          "label": "선예매(Saturday 17:00 Onsale)"
         },
         {
-          "label": "선예매(Sunday 09:00 Onsale)",
-          "at": "2026-09-27T08:00:00Z"
+          "at": "2026-09-27T08:00:00Z",
+          "label": "선예매(Sunday 09:00 Onsale)"
         },
         {
-          "label": "선예매(Sunday 13:00 Onsale)",
-          "at": "2026-09-27T12:00:00Z"
+          "at": "2026-09-27T12:00:00Z",
+          "label": "선예매(Sunday 13:00 Onsale)"
         },
         {
-          "label": "선예매(Sunday 17:00 Onsale)",
-          "at": "2026-09-27T16:00:00Z"
+          "at": "2026-09-27T16:00:00Z",
+          "label": "선예매(Sunday 17:00 Onsale)"
         }
       ],
-      "first_seen": "2026-11-24T02:57:37+09:00"
-    },
-    {
-      "key": "tm:1AgZkfwGkd5KFPx",
       "source": "ticketmaster",
-      "artist": "Oasis",
-      "title": "Oasis Live '27",
       "start": "2027-05-25",
-      "end": "2027-05-25",
-      "time": "17:00",
-      "venue": "Celtic Park",
-      "city": "Glasgow",
-      "country": "GB",
-      "url": "https://www.ticketmaster.co.uk/oasis-live-27-glasgow-25-05-2027/event/35006532CB4C8962",
       "ticket_links": [
         {
           "name": "Ticketmaster",
           "url": "https://www.ticketmaster.co.uk/oasis-live-27-glasgow-25-05-2027/event/35006532CB4C8962"
         }
       ],
-      "sale_start": "",
-      "sale_times": [
-        {
-          "label": "선예매(Friday 09:00 Onsale)",
-          "at": "2026-09-25T08:00:00Z"
-        },
-        {
-          "label": "선예매(Friday 13:00 Onsale)",
-          "at": "2026-09-25T12:00:00Z"
-        },
-        {
-          "label": "선예매(Friday 17:00 Onsale)",
-          "at": "2026-09-25T16:00:00Z"
-        },
-        {
-          "label": "선예매(Saturday 09:00 Onsale)",
-          "at": "2026-09-26T08:00:00Z"
-        },
-        {
-          "label": "선예매(Saturday 13:00 Onsale)",
-          "at": "2026-09-26T12:00:00Z"
-        },
-        {
-          "label": "선예매(Saturday 17:00 Onsale)",
-          "at": "2026-09-26T16:00:00Z"
-        },
-        {
-          "label": "선예매(Sunday 09:00 Onsale)",
-          "at": "2026-09-27T08:00:00Z"
-        },
-        {
-          "label": "선예매(Sunday 13:00 Onsale)",
-          "at": "2026-09-27T12:00:00Z"
-        },
-        {
-          "label": "선예매(Sunday 17:00 Onsale)",
-          "at": "2026-09-27T16:00:00Z"
-        }
-      ],
-      "first_seen": "2026-11-26T04:04:28+09:00"
+      "time": "17:00",
+      "title": "Oasis Live '27",
+      "url": "https://www.ticketmaster.co.uk/oasis-live-27-glasgow-25-05-2027/event/35006532CB4C8962",
+      "venue": "Celtic Park"
     }
   ]
 }
